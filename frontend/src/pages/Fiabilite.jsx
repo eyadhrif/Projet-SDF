@@ -26,7 +26,8 @@ export default function Fiabilite() {
       <div className="grid">
         <Kpi label="MTTF" value={fmt(fi.mttf, 1)} unit="cycles" hint="γ + η·Γ(1+1/β)" />
         <Kpi label="Médiane KM" value={fmt(fi.median_km, 0)} unit="cycles" hint="R(t) = 0,5" />
-        <Kpi label="Durée B10" value={fmt(fi.b10, 0)} unit="cycles" hint="10 % de défaillances" />
+        <Kpi label="Durée B10" value={fmt(fi.b10, 0)} unit="cycles"
+          hint={`10 % de défaillances · B1 = ${fmt(fi.b1, 0)} · B50 = ${fmt(fi.b50, 0)}`} />
         <Kpi label="Disponibilité A" value={fmt(di.A * 100, 2)} unit="%" hint="MUT / (MUT + MDT)" />
       </div>
 
@@ -64,6 +65,11 @@ export default function Fiabilite() {
           </table>
           <div className="note">R² du diagramme de Weibull (MCO) : <b>{fmt(fi.mco.r2, 3)}</b>. La courbure visible du
             diagramme signale un seuil γ &gt; 0. IC 95 % MV censuré : β ∈ [{fmt(fi.mv_cens.beta_ci[0])} ; {fmt(fi.mv_cens.beta_ci[1])}].</div>
+          <div className="params" style={{ marginTop: 12, gridTemplateColumns: 'repeat(3, 1fr)' }}>
+            <Param l="B1 (1 %)" v={`${fmt(fi.b1, 1)} cycles`} />
+            <Param l="B10 (10 %)" v={`${fmt(fi.b10, 1)} cycles`} />
+            <Param l="B50 (médiane)" v={`${fmt(fi.b50, 1)} cycles`} />
+          </div>
           <div className="note">β = {fmt(fi.w3.beta)} &gt; 1 : <b>taux de défaillance croissant</b>, donc usure. La maintenance
             préventive est justifiée.</div>
         </Card>

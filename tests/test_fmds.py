@@ -289,9 +289,11 @@ def test_non_regression_indicateurs(out):
     assert fi["mttf_km"] == pytest.approx(214.28, abs=0.01)
 
 
-@pytest.mark.xfail(strict=True, reason="B50 pas encore exporté par fmds.py (ticket A1 de la phase A)")
-def test_b50_exporte(out):
+def test_b50_exporte(out, W):
+    """A1 : B50 exporté (199,9 cycles, valeur de la section 1) et égal au quantile 50 % du modèle."""
     assert out["fiabilite"]["b50"] == pytest.approx(199.9, abs=0.05)
+    assert out["fiabilite"]["b50"] == round(float(W.quantile(0.5)), 1)
+    assert out["fiabilite"]["b10"] < out["fiabilite"]["b50"] < out["fiabilite"]["mttf"]
 
 
 def test_b50_calcule_depuis_le_modele(W):

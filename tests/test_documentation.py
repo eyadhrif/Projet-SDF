@@ -44,6 +44,7 @@ def _attendus():
         "MTTF": f"= **{fr(fi['mttf'], 1)} cycles**",
         "B10": f"B10 = {fr(fi['b10'], 0)} cycles",
         "B1": f"B1 = {fr(fi['b1'], 0)} cycles",
+        "B50": f"B50 = {fr(fi['b50'], 1)} cycles",
         "loi de maintenabilité": f"μ = {fr(ma['mu'], 3)}, σ = {fr(ma['sigma'], 3)}, KS p = {fr(ma['ks']['p'])}",
         "MTTR": f"**MTTR = {fr(ma['mttr_h'], 1)} h** ({fr(ma['mttr_cycles'], 1)} cycles)",
         "t90": f"t90 = {fr(ma['t90_h'], 1)} h",

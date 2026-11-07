@@ -25,7 +25,7 @@ export default function Overview({ go }) {
         </div>
 
         <div className="grid">
-          <Kpi label="MTTF (Weibull 3P)" value={fmt(fi.mttf, 1)} unit="cycles" hint={`KM : ${fmt(fi.mttf_km, 1)} cycles`} />
+          <Kpi label="MTTF (Weibull 3P)" value={fmt(fi.mttf, 1)} unit="cycles" hint={`B50 : ${fmt(fi.b50, 1)} · KM : ${fmt(fi.mttf_km, 1)} cycles`} />
           <Kpi label="Disponibilité intrinsèque" value={fmt(fm.disponibilite.A * 100, 2)} unit="%"
             hint={`MTTR ${fmt(fm.maintenabilite.mttr_h, 1)} h`} />
           <Kpi label="Paramètre de forme β" value={fmt(fi.w3.beta, 2)} hint={`Taux de défaillance ${fi.failure_mode}`} />

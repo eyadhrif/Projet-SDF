@@ -44,6 +44,7 @@ async function ouvrir(page, cible, id) {
 }
 
 const kpi = (page, label) => page.locator('.kpi', { has: page.locator('.l', { hasText: label }) }).locator('.v')
+const kpiIndication = (page, label) => page.locator('.kpi', { has: page.locator('.l', { hasText: label }) }).locator('.h')
 const carte = (page, titre) => page.locator('.card', { has: page.locator('h3', { hasText: titre }) })
 
 for (const cible of CIBLES) {
@@ -96,6 +97,7 @@ for (const cible of CIBLES) {
       await expect(kpi(page, 'RMSE')).toContainText(fmt(RUL.metrics.lstm.rmse, 1))
       // valeurs attendues en clair (section 1 du prompt maître)
       await expect(kpi(page, 'MTTF')).toContainText('206,3')
+      await expect(kpiIndication(page, 'MTTF')).toContainText(`B50 : ${fmt(fi.b50, 1)}`)
       await expect(kpi(page, 'Disponibilité')).toContainText('95,98')
       await expect(kpi(page, 'forme β')).toContainText('1,83')
     })
@@ -106,6 +108,9 @@ for (const cible of CIBLES) {
       await expect(kpi(page, 'MTTF')).toContainText(fmt(fi.mttf, 1))
       await expect(kpi(page, 'Médiane KM')).toContainText(fmt(fi.median_km, 0))
       await expect(kpi(page, 'B10')).toContainText(fmt(fi.b10, 0))
+      await expect(kpiIndication(page, 'B10')).toContainText(`B50 = ${fmt(fi.b50, 0)}`)
+      await expect(page.locator('.param', { hasText: 'B50 (médiane)' })).toContainText(fmt(fi.b50, 1))
+      await expect(page.locator('.param', { hasText: 'B50 (médiane)' })).toContainText('199,9')
       await expect(kpi(page, 'Disponibilité A')).toContainText(fmt(FMDS.disponibilite.A * 100, 2))
 
       await ouvrir(page, cible, 'rul')

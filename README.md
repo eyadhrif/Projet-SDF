@@ -107,8 +107,9 @@ La Weibull 3P et la log-normale sont équivalentes (ΔAIC < 1). On retient la We
 
 **Indicateurs :**
 - MTTF = γ + η·Γ(1 + 1/β) = **206,3 cycles**
-- B10 = 152 cycles
 - B1 = 133 cycles
+- B10 = 152 cycles
+- B50 = 199,9 cycles (durée médiane : la moitié des moteurs a défailli)
 
 ### 3.2 Maintenabilité, disponibilité, stratégie (FMDS-02)
 

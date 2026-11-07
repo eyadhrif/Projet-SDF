@@ -157,6 +157,7 @@ def fiabilite(life: pd.DataFrame):
         "mttf": _r(W.mttf(), 2), "mttf_km": _r(km_mean, 2),
         "median_km": _r(float(km.median_survival_time_), 1),
         "b10": _r(W.quantile(0.10), 1), "b1": _r(W.quantile(0.01), 1),
+        "b50": _r(W.quantile(0.50), 1),       # durée médiane du modèle retenu (A1)
         "t_min_obs": _r(complete.min(), 0),
         "failure_mode": "croissant (usure)" if b3 > 1 else "constant/décroissant",
     }, W
