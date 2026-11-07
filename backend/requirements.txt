@@ -1,0 +1,11 @@
+# Dashboard uniquement (résultats déjà calculés dans results/)
+fastapi>=0.110
+uvicorn>=0.29
+# Pour relancer les calculs (python run_all.py)
+numpy
+pandas
+scipy
+scikit-learn
+lifelines
+joblib
+torch
