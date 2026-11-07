@@ -123,3 +123,59 @@ def test_couverture_et_biais_recalcules(results):
 
 def test_constantes():
     assert (HORIZON, N_SAMPLES, DEG) == (400, 1000, 2)
+
+
+# ------------------------------------------------------------- calibration (A6)
+def test_quantiles_supplementaires_ordonnes(deg, sprint2):
+    for u, g in list(sprint2["test"].groupby("unit"))[::10]:
+        p = deg.predict(g.cycle.values, g.HI_raw.values, np.random.default_rng(2))
+        q = [p[k] for k in ("p05", "p10", "p25", "rul", "p75", "p90", "p95")]
+        assert q == sorted(q), f"moteur {u}"
+
+
+def test_quantiles_supplementaires_ne_changent_pas_les_tirages(deg, sprint2):
+    """Les quantiles ajoutés en A6 sont calculés sur les mêmes tirages : le générateur avance pareil."""
+    g = sprint2["test"][sprint2["test"].unit == 20]
+    rng = np.random.default_rng(9)
+    deg.predict(g.cycle.values, g.HI_raw.values, rng)
+    ref = np.random.default_rng(9)
+    ref.multivariate_normal(np.zeros(DEG + 1), np.eye(DEG + 1), size=N_SAMPLES)
+    ref.normal(size=(N_SAMPLES, 1))
+    assert rng.random() == ref.random()
+
+
+def test_quantiles_exportes(results):
+    for r in results["rul"]["table"]:
+        assert r["deg_p05"] <= r["deg_p10"] <= r["deg_p25"] <= r["deg"] <= r["deg_p75"] <= r["deg_p90"] <= r["deg_p95"]
+
+
+def test_calibration_cas_calcule_a_la_main():
+    import pandas as pd
+    from run_all import calibration_degradation
+    # 4 moteurs : RUL réel 20, 60, 80, 150 ; prédiction en retard de +10, +30, -10, 0
+    tab = pd.DataFrame({"true": [20, 60, 80, 150], "deg": [30, 90, 70, 150],
+                        "deg_p05": [0, 50, 40, 100], "deg_p10": [10, 70, 50, 120], "deg_p25": [25, 80, 60, 140],
+                        "deg_p75": [35, 100, 75, 160], "deg_p90": [40, 110, 90, 170], "deg_p95": [50, 120, 100, 200]})
+    c = calibration_degradation(tab)
+    cov = {n["nominal"]: n["couverture"] for n in c["calibration"]}
+    # P25–P75 : seul le moteur 4 (25 %) ; P10–P90 : moteurs 1, 3 et 4 (75 %) ; P05–P95 : tous (100 %)
+    assert cov == {50: 25.0, 80: 75.0, 90: 100.0}
+    assert c["biais"]["moyen"] == 7.5 and c["biais"]["median"] == 5.0 and c["biais"]["pct_tardif"] == 50.0
+    assert c["biais"]["rmse_hors_biais"] == round(float(np.std([10, 30, -10, 0])), 2)
+    t = c["biais"]["par_tranche"]
+    assert [x["n"] for x in t] == [1, 2, 1]
+    assert [x["biais"] for x in t] == [10.0, 10.0, 0.0]
+
+
+def test_calibration_du_json_recalculee(results):
+    t = results["rul"]["table"]
+    info = results["rul"]["deg_info"]
+    true = np.array([r["true"] for r in t])
+    for niv, (lo, hi) in zip(info["calibration"], (("deg_p25", "deg_p75"), ("deg_p10", "deg_p90"), ("deg_p05", "deg_p95"))):
+        a, b = np.array([r[lo] for r in t]), np.array([r[hi] for r in t])
+        assert niv["couverture"] == round(100 * np.mean((true >= a) & (true <= b)), 1)
+    assert info["calibration"][1]["couverture"] == info["coverage_10_90"] == 54.0
+    assert sum(x["n"] for x in info["biais"]["par_tranche"]) == 100
+    assert info["biais"]["moyen"] == results["rul"]["metrics"]["deg"]["bias"]
+    # limite connue : sous-couverture à tous les niveaux
+    assert all(n["couverture"] < n["nominal"] for n in info["calibration"])

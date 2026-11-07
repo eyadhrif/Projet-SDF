@@ -189,6 +189,37 @@ export default function Rul({ engine, setEngine }) {
             </table>
           </div>
         </Card>
+
+        <Card title="Calibration du modèle de dégradation" span={12}
+          sub="Couverture empirique des intervalles de RUL comparée au niveau nominal, et biais selon le RUL réel (diagnostic a posteriori, modèle inchangé)">
+          <div className="grid" style={{ gap: 12 }}>
+            <div className="s6">
+              <table>
+                <thead><tr><th>Intervalle</th><th className="num">Nominal</th><th className="num">Couverture</th><th className="num">Largeur moy.</th></tr></thead>
+                <tbody>{d.deg_info.calibration.map((c) => (
+                  <tr key={c.nominal}><td>{c.bornes.join('–')}</td><td className="num">{c.nominal} %</td>
+                    <td className={`num ${c.couverture < c.nominal - 10 ? 'ko' : ''}`}>{fmt(c.couverture, 0)} %</td>
+                    <td className="num">{fmt(c.largeur_moyenne, 1)} cycles</td></tr>))}
+                </tbody>
+              </table>
+            </div>
+            <div className="s6">
+              <table>
+                <thead><tr><th>RUL réel</th><th className="num">Moteurs</th><th className="num">Biais</th><th className="num">MAE</th><th className="num">Couv. 80 %</th></tr></thead>
+                <tbody>{d.deg_info.biais.par_tranche.map((t) => (
+                  <tr key={t.rul_min}><td>{t.rul_max ? `${t.rul_min}–${t.rul_max}` : `> ${t.rul_min}`} cycles</td>
+                    <td className="num">{t.n}</td><td className="num">{fmt(t.biais, 1)}</td>
+                    <td className="num">{fmt(t.mae, 1)}</td><td className="num">{fmt(t.couverture_80, 0)} %</td></tr>))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div className="note warn">Les intervalles sont <b>trop étroits</b> : à chaque niveau, la couverture observée est
+            inférieure au niveau nominal. Le biais moyen est de {fmt(d.deg_info.biais.moyen, 1)} cycles
+            ({fmt(d.deg_info.biais.pct_tardif, 0)} % de prédictions tardives). Sans ce biais, l'écart-type des erreurs serait de
+            {' '}{fmt(d.deg_info.biais.rmse_hors_biais, 1)} cycles : c'est un diagnostic, pas une performance atteignable, car le biais
+            est mesuré sur le jeu de test lui-même.</div>
+        </Card>
       </div>
     </>)
   }}</Guard>

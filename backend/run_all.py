@@ -62,6 +62,39 @@ def r(x, n=2):
     return round(float(x), n)
 
 
+TRANCHES_RUL = [(0, 50), (50, 100), (100, 1000)]   # tranches du RUL réel pour l'analyse du biais
+
+
+def calibration_degradation(tab: pd.DataFrame):
+    """A6 — Calibration du modèle de dégradation, sans le modifier (diagnostic a posteriori).
+
+    - couverture empirique des intervalles centrés à 50 %, 80 % et 90 % (P25–P75, P10–P90, P05–P95),
+      à comparer au niveau nominal : une couverture inférieure signale une incertitude sous-estimée
+    - biais (moyen, médian, part des prédictions tardives) et biais par tranche de RUL réel
+    - « RMSE hors biais » = écart-type des erreurs : erreur qui resterait si le biais moyen était
+      retiré. Ce n'est PAS une performance atteignable : le biais est mesuré sur le jeu de test lui-même.
+    """
+    e = tab["deg"] - tab["true"]
+    niveaux = []
+    for nominal, lo, hi in ((50, "deg_p25", "deg_p75"), (80, "deg_p10", "deg_p90"), (90, "deg_p05", "deg_p95")):
+        dedans = (tab["true"] >= tab[lo]) & (tab["true"] <= tab[hi])
+        niveaux.append({"nominal": nominal, "bornes": [lo[4:].upper(), hi[4:].upper()],
+                        "couverture": r(100 * dedans.mean(), 1),
+                        "largeur_moyenne": r((tab[hi] - tab[lo]).mean(), 1)})
+    tranches = []
+    for a, b in TRANCHES_RUL:
+        m = (tab["true"] > a) & (tab["true"] <= b) if a else (tab["true"] <= b)
+        em = e[m]
+        dedans = ((tab["true"] >= tab["deg_p10"]) & (tab["true"] <= tab["deg_p90"]))[m]
+        tranches.append({"rul_min": a, "rul_max": None if b >= 1000 else b, "n": int(m.sum()),
+                         "biais": r(em.mean(), 1) if len(em) else None,
+                         "mae": r(em.abs().mean(), 1) if len(em) else None,
+                         "couverture_80": r(100 * dedans.mean(), 1) if len(em) else None})
+    return {"calibration": niveaux, "biais": {
+        "moyen": r(e.mean()), "median": r(e.median()), "pct_tardif": r(100 * (e > 0).mean(), 1),
+        "rmse_hors_biais": r(e.std(ddof=0)), "par_tranche": tranches}}
+
+
 def _version(p):
     try:
         return version(p)
@@ -186,6 +219,8 @@ def main(argv=None):
         rows.append({
             "unit": int(u), "cycles": int(t[-1]), "true": true_rul,
             "deg": r(d["rul"], 1), "deg_p10": r(d["p10"], 1), "deg_p90": r(d["p90"], 1),
+            "deg_p05": r(d["p05"], 1), "deg_p25": r(d["p25"], 1), "deg_p75": r(d["p75"], 1),
+            "deg_p95": r(d["p95"], 1),
             "lstm": r(pl[-1], 1), "hi": r(g.HI.values[-1], 3), "p_crit": r(p_now, 3),
             "state": str(state_from_prob(np.array([p_now]))[0]),
         })
@@ -225,6 +260,7 @@ def main(argv=None):
                            "within15": r(100 * np.mean(np.abs(e) <= 15), 1),
                            "late_pct": r(100 * np.mean(e > 0), 1)}
     cover = np.mean((tab["true"] >= tab["deg_p10"]) & (tab["true"] <= tab["deg_p90"]))
+    calibration = calibration_degradation(tab)
     bins = np.arange(-80, 81, 10)
     hist = []
     for lo in bins[:-1]:
@@ -244,7 +280,7 @@ def main(argv=None):
         "metrics": metrics, "table": rows, "error_hist": hist,
         "deg_info": {"threshold": r(deg.threshold, 4), "threshold_std": r(deg.threshold_std, 4),
                      "sigma": r(deg.sigma2 ** .5, 4), "prior_mean": [r(x, 4) for x in deg.m0],
-                     "coverage_10_90": r(100 * cover, 1)},
+                     "coverage_10_90": r(100 * cover, 1), **calibration},
         "lstm_info": {"seq": SEQ, "cap": RUL_CAP, "history": lstm.history,
                       "best_val_rmse": r(lstm.best_val_rmse), "n_features": len(selected)},
     })

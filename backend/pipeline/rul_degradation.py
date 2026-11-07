@@ -62,9 +62,11 @@ class DegradationRUL:
         below = curves <= thr
         first = np.where(below.any(1), below.argmax(1), HORIZON)
         rul = first.astype(float)
+        # quantiles supplémentaires (A6, calibration) : mêmes tirages, aucun changement du modèle
+        q = {f"p{k:02d}": float(np.percentile(rul, k)) for k in (5, 25, 75, 95)}
         return {
             "rul": float(np.median(rul)), "p10": float(np.percentile(rul, 10)),
-            "p90": float(np.percentile(rul, 90)), "m": m,
+            "p90": float(np.percentile(rul, 90)), "m": m, **q,
         }
 
     def mean_curve(self, m, t0, t1, step=2):

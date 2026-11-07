@@ -118,6 +118,9 @@ for (const cible of CIBLES) {
       await expect(kpi(page, 'RMSE · Dégradation')).toContainText(fmt(RUL.metrics.deg.rmse, 2))
       await expect(kpi(page, 'Score NASA')).toContainText(fmt(RUL.metrics.lstm.score, 0))
       await expect(kpi(page, 'Couverture')).toContainText(fmt(RUL.deg_info.coverage_10_90, 0))
+      const cal = carte(page, 'Calibration du modèle de dégradation')
+      for (const c of RUL.deg_info.calibration) await expect(cal).toContainText(`${fmt(c.couverture, 0)} %`)
+      await expect(cal.locator('tbody tr')).toHaveCount(6)
     })
 
     test('tableau de classification = JSON', async ({ page }) => {
