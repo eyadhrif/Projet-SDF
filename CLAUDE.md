@@ -80,7 +80,7 @@ pytest.ini                    marker `slow`, pythonpath = backend
 cd backend
 pip install fastapi uvicorn
 python -m uvicorn api.main:app --port 8000      # http://localhost:8000
-python run_all.py                               # recompute (needs requirements.txt)
+python run_all.py                               # recompute (needs requirements.txt); --reentrainer-lstm to retrain the LSTM
 
 cd frontend
 npm install
@@ -89,7 +89,7 @@ npm run dev                                     # or: npm run build / npm run bu
 
 After rebuilding the static version, copy `frontend/dist-static/index.html` to `dashboard_autonome.html`.
 
-**Warning:** `run_all.py` overwrites `backend/results/` and `backend/models/`, including the reference LSTM. To check reproducibility without touching them, use the slow test `tests/test_results.py::test_run_all_reproduit_les_resultats` (runs in a temp copy).
+`run_all.py` (A5) reloads the reference LSTM `models/lstm_rul.pt` by default, so all 4 JSON files come out byte-identical (~1 min); `--reentrainer-lstm` retrains and overwrites it (machine-dependent numbers). Every run writes `results/run_info.json` (date, duration, library versions, seeds, LSTM mode). Slow tests in `tests/test_results.py` check both modes in a temp copy.
 
 ### Tests
 

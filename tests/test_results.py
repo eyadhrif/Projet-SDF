@@ -110,20 +110,56 @@ def _sans_lstm(name, d):
     return d
 
 
-@pytest.mark.slow
-def test_run_all_reproduit_les_resultats(tmp_path, results):
-    """Relance run_all.py dans une copie (les fichiers commités ne sont pas touchés) :
-    tout est identique au JSON commité hors LSTM ; le LSTM reste dans la tolérance (§0.3)."""
+def _copie_et_lance(tmp_path, *args, garder_lstm):
+    """Copie backend/ et data/ dans tmp_path (fichiers commités intacts) et lance run_all.py."""
     shutil.copytree(BACKEND, tmp_path / "backend",
                     ignore=shutil.ignore_patterns("results", "models", "__pycache__"))
     shutil.copytree(ROOT / "data", tmp_path / "data")
+    if garder_lstm:
+        (tmp_path / "backend" / "models").mkdir()
+        shutil.copy(MODELS / "lstm_rul.pt", tmp_path / "backend" / "models" / "lstm_rul.pt")
     env = {**os.environ, "PYTHONIOENCODING": "utf-8"}
-    p = subprocess.run([sys.executable, "run_all.py"], cwd=tmp_path / "backend", env=env,
+    p = subprocess.run([sys.executable, "run_all.py", *args], cwd=tmp_path / "backend", env=env,
                        capture_output=True, text=True, encoding="utf-8", timeout=1200)
     assert p.returncode == 0, p.stderr[-2000:]
-    new = {n: _strict_load(tmp_path / "backend" / "results" / f"{n}.json") for n in NAMES}
+    res = tmp_path / "backend" / "results"
+    return {n: _strict_load(res / f"{n}.json") for n in NAMES + ("run_info",)}
+
+
+@pytest.mark.slow
+def test_run_all_reproduit_exactement_les_resultats(tmp_path, results):
+    """Mode par défaut (LSTM de référence rechargé) : les 4 JSON sont identiques aux fichiers commités."""
+    new = _copie_et_lance(tmp_path, garder_lstm=True)
+    for n in NAMES:
+        assert new[n] == results[n], f"{n}.json diffère"
+    assert new["run_info"]["lstm"].startswith("rechargé")
+
+
+@pytest.mark.slow
+def test_run_all_avec_reentrainement_du_lstm(tmp_path, results):
+    """--reentrainer-lstm : identique hors LSTM ; le LSTM reste dans la tolérance (§0.3)."""
+    new = _copie_et_lance(tmp_path, "--reentrainer-lstm", garder_lstm=False)
     for n in NAMES:
         assert _sans_lstm(n, new[n]) == _sans_lstm(n, results[n]), f"{n}.json diffère hors LSTM"
     m, ref = new["rul"]["metrics"]["lstm"], results["rul"]["metrics"]["lstm"]
     assert m["rmse"] == pytest.approx(ref["rmse"], abs=0.5)
     assert 13 <= m["rmse"] <= 18
+    assert new["run_info"]["lstm"].startswith("réentraîné")
+
+
+# ------------------------------------------------------------- traçabilité (A5)
+def test_run_info():
+    info = _strict_load(RESULTS / "run_info.json")
+    assert set(info) >= {"date", "duree_s", "python", "systeme", "bibliotheques", "graines", "lstm"}
+    assert info["duree_s"] > 0
+    assert all(info["bibliotheques"][p] for p in ("numpy", "pandas", "scikit-learn", "lifelines", "torch"))
+    assert len(info["graines"]) == 4 and 42 in info["graines"].values()
+    assert info["lstm"].startswith("rechargé")         # résultats publiés = modèle de référence
+
+
+def test_graines_documentees_coherentes_avec_le_code():
+    from pipeline import fmds
+    import run_all
+    assert fmds.SEED in run_all.GRAINES.values()
+    src = (BACKEND / "pipeline" / "rul_lstm.py").read_text(encoding="utf-8")
+    assert "torch.manual_seed(0)" in src and "np.random.seed(0)" in src and "default_rng(0)" in src

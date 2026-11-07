@@ -1,15 +1,29 @@
 """Exécute toute la chaîne (sprints 1 à 3) et exporte les résultats JSON pour le dashboard.
 
-    python run_all.py            # ~2-4 min sur CPU
+    python run_all.py                     # ~2 min sur CPU ; recharge le LSTM de référence
+    python run_all.py --reentrainer-lstm  # réentraîne aussi le LSTM (~+2 min) et écrase models/lstm_rul.pt
+
+Reproductibilité (A5) : toutes les étapes sont déterministes (graines fixées, voir GRAINES),
+sauf l'entraînement du LSTM, qui varie d'une machine à l'autre (calcul flottant de torch sur CPU).
+Par défaut, le LSTM n'est donc PAS réentraîné : le modèle de référence models/lstm_rul.pt est
+rechargé, ce qui redonne exactement les résultats publiés. Les versions, la date, la durée et
+le mode LSTM de chaque exécution sont écrits dans results/run_info.json.
 """
+import argparse
 import json
+import platform
+import subprocess
+import sys
 import time
+from datetime import datetime
+from importlib.metadata import version, PackageNotFoundError
 from pathlib import Path
 
 import joblib
 import numpy as np
 import pandas as pd
 
+from pipeline import fmds as fmds_mod
 from pipeline.data import load_fd001, lifetime_table, SENSOR_INFO
 from pipeline.fmds import compute_fmds
 from pipeline.features import sensor_ranking, window_features, HealthIndicator
@@ -22,6 +36,15 @@ RES = ROOT / "results"
 MOD = ROOT / "models"
 RES.mkdir(exist_ok=True)
 MOD.mkdir(exist_ok=True)
+
+# Toutes les graines aléatoires du projet (documentées dans results/run_info.json)
+GRAINES = {
+    "fmds.SEED — temps de réparation simulés (log-normale)": fmds_mod.SEED,
+    "health — random_state des modèles et sous-échantillonnage du SVM": 0,
+    "rul_degradation — générateur partagé des tirages (np.random.default_rng)": 0,
+    "rul_lstm — torch.manual_seed, np.random.seed et choix des 15 moteurs de validation": 0,
+}
+LIBS = ("numpy", "pandas", "scipy", "scikit-learn", "lifelines", "torch", "joblib", "fastapi")
 
 
 def dump(name, obj):
@@ -39,7 +62,39 @@ def r(x, n=2):
     return round(float(x), n)
 
 
-def main():
+def _version(p):
+    try:
+        return version(p)
+    except PackageNotFoundError:
+        return None
+
+
+def _git_commit():
+    try:
+        out = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT, capture_output=True, text=True)
+        return out.stdout.strip() or None
+    except OSError:
+        return None
+
+
+def run_info(debut, duree, mode_lstm):
+    """Traçabilité d'une exécution : date, durée, environnement, graines, mode du LSTM."""
+    return {
+        "date": debut.isoformat(timespec="seconds"), "duree_s": round(duree, 1),
+        "commit_git": _git_commit(),
+        "python": platform.python_version(), "systeme": f"{platform.system()} {platform.release()}",
+        "processeur": platform.machine(),
+        "bibliotheques": {p: _version(p) for p in LIBS},
+        "graines": GRAINES, "lstm": mode_lstm,
+    }
+
+
+def main(argv=None):
+    ap = argparse.ArgumentParser(description="Chaîne complète FMDS + maintenance prédictive (C-MAPSS FD001)")
+    ap.add_argument("--reentrainer-lstm", action="store_true",
+                    help="réentraîner le LSTM au lieu de recharger models/lstm_rul.pt (résultats dépendants de la machine)")
+    args = ap.parse_args(argv)
+    debut = datetime.now()
     t0 = time.time()
     print("[S0] Chargement C-MAPSS FD001")
     train, test, rul_end = load_fd001()
@@ -101,8 +156,16 @@ def main():
     joblib.dump(deg, MOD / "degradation_model.joblib")
 
     print("[S3b] RUL — LSTM (Salma)")
-    lstm = LSTMRUL(selected).fit(train)
-    lstm.save(MOD / "lstm_rul.pt")
+    ref_lstm = MOD / "lstm_rul.pt"
+    if args.reentrainer_lstm or not ref_lstm.exists():
+        lstm = LSTMRUL(selected).fit(train)
+        lstm.save(ref_lstm)
+        mode_lstm = "réentraîné (résultats dépendants de la machine)"
+    else:
+        lstm = LSTMRUL.load(ref_lstm)
+        assert lstm.sensors == selected, "capteurs du LSTM de référence ≠ capteurs retenus : --reentrainer-lstm"
+        mode_lstm = "rechargé depuis models/lstm_rul.pt (modèle de référence)"
+        print(f"  {mode_lstm}")
 
     print("[S3c] Prédictions sur le jeu de test")
     rng = np.random.default_rng(0)
@@ -179,8 +242,10 @@ def main():
                       "best_val_rmse": r(lstm.best_val_rmse), "n_features": len(selected)},
     })
     dump("engines.json", engines)
-    print(f"Terminé en {time.time() - t0:.0f} s")
+    duree = time.time() - t0
+    dump("run_info.json", run_info(debut, duree, mode_lstm))
+    print(f"Terminé en {duree:.0f} s")
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

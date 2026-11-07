@@ -15,17 +15,32 @@ from pipeline.rul_lstm import LSTMRUL, LSTMRegressor, SEQ, RUL_CAP
 
 
 def charger_lstm(path=MODELS / "lstm_rul.pt"):
-    ck = torch.load(path, weights_only=False)
-    m = LSTMRUL(ck["sensors"])
-    m.lo, m.hi = pd.Series(ck["lo"]), pd.Series(ck["hi"])
-    m.model = LSTMRegressor(len(ck["sensors"]))
-    m.model.load_state_dict(ck["state"])
-    return m
+    """Chargeur officiel du modèle (LSTMRUL.load, ajouté au ticket A5)."""
+    return LSTMRUL.load(path)
 
 
 @pytest.fixture(scope="module")
 def lstm():
     return charger_lstm()
+
+
+def test_checkpoint_contient_l_historique(lstm, results):
+    """Le modèle de référence porte son historique d'apprentissage (= lstm_info de rul.json)."""
+    info = results["rul"]["lstm_info"]
+    assert lstm.history == info["history"] and len(lstm.history) == 59
+    assert lstm.best_val_rmse == info["best_val_rmse"]
+    assert lstm.sensors == results["health"]["selected"]
+
+
+def test_chargement_manuel_equivalent(lstm, fd001):
+    """Reconstruction à la main depuis le checkpoint : mêmes prédictions que LSTMRUL.load."""
+    ck = torch.load(MODELS / "lstm_rul.pt", weights_only=False)
+    m = LSTMRUL(ck["sensors"])
+    m.lo, m.hi = pd.Series(ck["lo"]), pd.Series(ck["hi"])
+    m.model = LSTMRegressor(len(ck["sensors"]))
+    m.model.load_state_dict(ck["state"])
+    g = fd001[1][fd001[1].unit == 3]
+    np.testing.assert_array_equal(m.predict_unit(g)[1], lstm.predict_unit(g)[1])
 
 
 def rmse(p, t):

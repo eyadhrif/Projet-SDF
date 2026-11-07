@@ -109,4 +109,24 @@ class LSTMRUL:
 
     def save(self, path):
         torch.save({"state": self.model.state_dict(), "sensors": self.sensors,
-                    "lo": self.lo.to_dict(), "hi": self.hi.to_dict()}, path)
+                    "lo": self.lo.to_dict(), "hi": self.hi.to_dict(),
+                    "history": getattr(self, "history", []),
+                    "best_val_rmse": getattr(self, "best_val_rmse", None)}, path)
+
+    @classmethod
+    def load(cls, path):
+        """Recharge un modèle sauvegardé (poids, normalisation, historique d'apprentissage).
+
+        Les prédictions sont identiques à celles du modèle d'origine : c'est la référence
+        des résultats publiés, car le réentraînement varie d'une machine à l'autre (D4).
+        """
+        import pandas as pd
+        ck = torch.load(path, weights_only=False)
+        m = cls(ck["sensors"])
+        m.lo, m.hi = pd.Series(ck["lo"]), pd.Series(ck["hi"])
+        m.model = LSTMRegressor(len(ck["sensors"]))
+        m.model.load_state_dict(ck["state"])
+        m.model.eval()
+        m.history = ck.get("history", [])
+        m.best_val_rmse = ck.get("best_val_rmse")
+        return m
