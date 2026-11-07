@@ -138,7 +138,7 @@ for (const cible of CIBLES) {
     test("D6 : bouton « Précédent » et changement d'adresse", async ({ page }) => {
       // Défaut constaté (D6) : App.jsx ne lit le hash qu'au démarrage (pas d'écoute de hashchange).
       // Le bouton « Précédent » change l'adresse mais pas la page affichée. Échec attendu jusqu'à correction.
-      test.fail()
+      test.fail(true, 'D6 : le bouton « Précédent » ne change pas la page affichée')
       await ouvrir(page, cible, 'overview')
       await page.locator('button.nav', { hasText: 'Fiabilité & FMDS' }).click()
       await expect(page.locator('main h1')).toHaveText(PAGES[1].h1)

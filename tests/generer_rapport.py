@@ -44,7 +44,9 @@ def lire_junit(path, outil):
             elif enfant.tag == "properties":
                 for p in enfant.iter("property"):
                     if p.get("name") == "fail" and statut == "réussi":
-                        statut, message = "échec attendu", p.get("value") or p.text or ""
+                        # description de l'annotation, sinon le nom du test (sans le préfixe de cible)
+                        message = (p.get("value") or (p.text or "").strip() or nom.split(" › ")[-1])
+                        statut = "échec attendu"
         tests.append({"fichier": fichier, "nom": nom, "statut": statut,
                       "duree": float(tc.get("time") or 0), "message": " ".join(message.split())[:160]})
     return tests
@@ -76,9 +78,13 @@ def versions():
 
 
 def commit():
+    """Hash du commit courant, signalé si l'arbre de travail contient des modifications non commitées."""
     try:
-        return subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=RACINE, capture_output=True,
-                              text=True).stdout.strip() or "?"
+        h = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=RACINE, capture_output=True,
+                           text=True).stdout.strip() or "?"
+        sale = subprocess.run(["git", "status", "--porcelain", "--untracked-files=no"], cwd=RACINE,
+                              capture_output=True, text=True).stdout.strip()
+        return f"{h} + modifications non commitées" if sale else h
     except OSError:
         return "?"
 
@@ -177,7 +183,7 @@ def main():
           "```", ""]
 
     (ICI / "RAPPORT_TESTS.md").write_text("\n".join(L), encoding="utf-8")
-    print(f"-> tests/RAPPORT_TESTS.md ({c['total'] if tous else 0} tests)")
+    print(f"-> tests/RAPPORT_TESTS.md ({len(tous)} tests)")
 
 
 if __name__ == "__main__":
