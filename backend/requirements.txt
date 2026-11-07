@@ -2,10 +2,11 @@
 fastapi>=0.110
 uvicorn>=0.29
 # Pour relancer les calculs (python run_all.py)
-numpy
-pandas
+numpy>=2.0        # np.trapezoid (fmds.py) n'existe qu'à partir de numpy 2.0
+pandas>=2.2       # groupby.apply(include_groups=...) (features.py) : pandas 2.2
 scipy
 scikit-learn
 lifelines
 joblib
 torch
+# Versions exactes testées : requirements-lock.txt

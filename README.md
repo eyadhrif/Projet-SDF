@@ -28,6 +28,10 @@ pip install -r requirements.txt      # numpy>=2, pandas>=2.2, scikit-learn, life
 python run_all.py
 ```
 
+Pour retrouver exactement l'environnement testé (Windows 11, Python 3.12, CPU) : `pip install -r requirements-lock.txt`.
+
+> **Windows : chemins trop longs.** torch installe des fichiers à des chemins très profonds. Si le projet est placé dans un dossier lui-même profond, l'installation échoue (`OSError: [Errno 2] No such file or directory … LICENSE…`) à cause de la limite de 260 caractères. Solutions : placer le projet (ou l'environnement virtuel) dans un dossier court, par exemple `C:\SdF\`, ou activer les chemins longs de Windows (`LongPathsEnabled`).
+
 ### Modifier le front (optionnel, Node 18+)
 
 ```bash
