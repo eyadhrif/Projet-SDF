@@ -55,14 +55,18 @@ for (const cible of CIBLES) {
         await expect(page.locator('main h1')).toHaveText(p.h1)
         await expect(page.locator('.err')).toHaveCount(0)
 
-        // chaque graphique est rendu : un SVG Recharts non vide par graphique
+        // chaque graphique est rendu avec des DONNÉES tracées (pas seulement axes et grille) ;
+        // l'attente couvre les animations (le camembert n'apparaît qu'après ≈ 1,5 s)
         const graphiques = page.locator('.recharts-wrapper > svg.recharts-surface')
         await expect(graphiques).toHaveCount(p.graphiques)
+        const MARQUES = '.recharts-line-curve, .recharts-bar-rectangle path, .recharts-area-area, '
+          + '.recharts-symbols, .recharts-pie-sector path, .recharts-scatter-symbol'
         for (const svg of await graphiques.all()) {
-          expect(await svg.locator('path, rect, circle, line').count()).toBeGreaterThan(0)
+          await expect(svg.locator(MARQUES).first()).toBeAttached({ timeout: 5000 })
           const b = await svg.boundingBox()
           expect(b.width).toBeGreaterThan(50)
         }
+        if (p.id === 'overview') await expect(page.locator('.recharts-pie-sector path')).toHaveCount(3)
 
         // aucun KPI ni paramètre ne vaut « — »
         for (const v of await page.locator('.kpi .v, .param .v').allTextContents()) {
@@ -74,10 +78,8 @@ for (const cible of CIBLES) {
         expect(erreurs, 'erreurs dans la console').toEqual([])
       })
 
-      test(`page « ${p.id} » : pas de défilement horizontal`, async ({ page }, info) => {
-        // Défaut constaté (D7) : en 390 px, le badge .tag (white-space: nowrap) élargit la colonne
-        // 1fr de .app, et toute la page déborde (182 / 30 / 10 / 129 px). Échec attendu sur mobile.
-        test.fail(info.project.name === 'mobile-390', 'D7 : débordement horizontal en largeur mobile')
+      test(`page « ${p.id} » : pas de défilement horizontal (D7)`, async ({ page }) => {
+        // D7 (corrigé) : colonne minmax(0, 1fr) et badge .tag autorisé à passer à la ligne
         await ouvrir(page, cible, p.id)
         const deborde = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)
         expect(deborde, 'débordement horizontal (px)').toBeLessThanOrEqual(1)
@@ -135,15 +137,17 @@ for (const cible of CIBLES) {
       await expect(page.locator('main h1')).toHaveText(PAGES[0].h1)          // page par défaut
     })
 
-    test("D6 : bouton « Précédent » et changement d'adresse", async ({ page }) => {
-      // Défaut constaté (D6) : App.jsx ne lit le hash qu'au démarrage (pas d'écoute de hashchange).
-      // Le bouton « Précédent » change l'adresse mais pas la page affichée. Échec attendu jusqu'à correction.
-      test.fail(true, 'D6 : le bouton « Précédent » ne change pas la page affichée')
+    test("bouton « Précédent » et changement d'adresse (D6)", async ({ page }) => {
+      // D6 (corrigé) : App.jsx écoute hashchange ; « Précédent » et la saisie d'adresse changent la page
       await ouvrir(page, cible, 'overview')
       await page.locator('button.nav', { hasText: 'Fiabilité & FMDS' }).click()
       await expect(page.locator('main h1')).toHaveText(PAGES[1].h1)
       await page.goBack()
       await expect(page.locator('main h1')).toHaveText(PAGES[0].h1, { timeout: 3000 })
+      await page.goForward()
+      await expect(page.locator('main h1')).toHaveText(PAGES[1].h1)
+      await page.evaluate(() => { location.hash = 'rul' })                    // saisie d'adresse
+      await expect(page.locator('main h1')).toHaveText(PAGES[3].h1)
     })
 
     test('cartes « Démarche » et priorités d\'intervention', async ({ page }) => {

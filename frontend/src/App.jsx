@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Overview from './pages/Overview.jsx'
 import Fiabilite from './pages/Fiabilite.jsx'
 import Monitoring from './pages/Monitoring.jsx'
@@ -15,6 +15,12 @@ export default function App() {
   const [page, setPage] = useState(() => (location.hash.slice(1) || 'overview'))
   const [engine, setEngine] = useState(31)
   const go = (id, eng) => { setPage(id); if (eng) setEngine(eng); location.hash = id; window.scrollTo(0, 0) }
+  // D6 : suivre les changements d'adresse (bouton « Précédent », lien, saisie dans la barre d'adresse)
+  useEffect(() => {
+    const onHash = () => setPage(location.hash.slice(1) || 'overview')
+    window.addEventListener('hashchange', onHash)
+    return () => window.removeEventListener('hashchange', onHash)
+  }, [])
   const P = (PAGES.find((p) => p.id === page) || PAGES[0]).C
   return (
     <div className="app">
