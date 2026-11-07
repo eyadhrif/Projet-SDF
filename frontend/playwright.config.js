@@ -13,7 +13,7 @@ export default defineConfig({
   timeout: 60_000,
   fullyParallel: false,
   workers: 2,
-  reporter: [['list'], ['junit', { outputFile: '../tests/junit_playwright.xml' }]],
+  reporter: [['list'], ['junit', { outputFile: '../tests/junit_playwright.xml', embedAnnotationsAsProperties: true }]],
   use: { baseURL: `http://127.0.0.1:${PORT}` },
   webServer: {
     command: `"${PY}" -m uvicorn api.main:app --port ${PORT}`,

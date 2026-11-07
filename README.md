@@ -44,6 +44,18 @@ npm run build          # -> frontend/dist, servi par FastAPI
 npm run build:static   # -> frontend/dist-static/index.html (version autonome)
 ```
 
+### Lancer les tests
+
+```bash
+pip install -r backend/requirements-dev.txt
+cd frontend && npm install && npx playwright install chromium && cd ..
+run_tests.bat              # Windows : tests rapides + dashboard (Playwright)
+run_tests.bat --slow       # suite complète, y compris réentraînements (~10 min)
+./run_tests.sh [--slow]    # Linux / macOS / Git Bash
+```
+
+Le résultat est écrit dans [`tests/RAPPORT_TESTS.md`](tests/RAPPORT_TESTS.md) : nombre de tests, réussites, échecs, durée, couverture du code et défauts connus.
+
 ---
 
 ## 2. Structure du projet et répartition (plan de sprints)
