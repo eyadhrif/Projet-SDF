@@ -5,3 +5,8 @@ frontend/dist-static/
 .venv/
 .coverage
 .pytest_cache/
+tests/junit_*.xml
+tests/couverture.json
+frontend/tests/resultats/
+frontend/tests/captures/
+frontend/playwright-report/
