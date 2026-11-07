@@ -27,6 +27,27 @@ def results():
     return {n: load_json(n) for n in ("fmds", "health", "rul", "engines")}
 
 
+@pytest.fixture(scope="session")
+def sprint2(fd001):
+    """Chaîne du sprint 2 refaite comme dans run_all.py : capteurs, HI, features fenêtrées.
+
+    Travaille sur des copies : les DataFrames de la fixture fd001 ne sont pas modifiés.
+    """
+    from pipeline.features import sensor_ranking, window_features, HealthIndicator
+    train, test = fd001[0].copy(), fd001[1].copy()
+    rank, selected, dropped = sensor_ranking(train)
+    hi = HealthIndicator(selected).fit(train)
+    for df in (train, test):
+        df["HI_raw"] = hi.raw(df)
+        df["HI"] = hi.transform(df)
+    Ftr, Fte = window_features(train, selected), window_features(test, selected)
+    for F, df in ((Ftr, train), (Fte, test)):
+        F["HI"] = df["HI"]
+        F["cycle"] = df["cycle"]
+    return {"train": train, "test": test, "rank": rank, "selected": selected, "dropped": dropped,
+            "hi": hi, "Ftr": Ftr, "Fte": Fte}
+
+
 @pytest.fixture()
 def client():
     """Client HTTP de test FastAPI, avec un cache vide à chaque test."""
