@@ -125,7 +125,7 @@ La Weibull 3P et la log-normale sont équivalentes (ΔAIC < 1). On retient la We
 | Modèle | AUC (CV) | AUC (test) | Rappel (test) |
 |---|---|---|---|
 | **Gradient Boosting** | 0,990 | **0,991** | 0,657 |
-| SVM (RBF) | 0,983 | 0,974 | 0,636 |
+| SVM (RBF) | 0,983 | 0,974 | 0,621 |
 
 ### 3.4 Durée de vie résiduelle (RUL-01, RUL-02, RUL-03)
 
