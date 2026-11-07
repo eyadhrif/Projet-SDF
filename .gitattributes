@@ -1,2 +1,5 @@
 *.bat text eol=crlf
 *.sh text eol=lf
+# Fichiers générés par vite : conservés octet pour octet (comparés au build par tests/test_build.py)
+frontend/dist/** -text
+dashboard_autonome.html -text
