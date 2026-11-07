@@ -24,7 +24,7 @@ import numpy as np
 import pandas as pd
 
 from pipeline import fmds as fmds_mod
-from pipeline.data import load_fd001, lifetime_table, SENSOR_INFO
+from pipeline.data import load_fd001, lifetime_table, describe_dataset, SENSOR_INFO
 from pipeline.fmds import compute_fmds
 from pipeline.features import sensor_ranking, window_features, HealthIndicator
 from pipeline.health import train_health_classifier, state_from_prob, CRITICAL_RUL
@@ -118,6 +118,13 @@ def main(argv=None):
     # ------------------------------------------------------------ Sprint 2
     print("[S2] Features, indicateur de santé, classification")
     rank, selected, dropped = sensor_ranking(train)
+
+    # A2 — description du jeu de données (tableau du rapport)
+    desc, table_vars = describe_dataset(train, test, rul_end, selected)
+    dump("dataset.json", desc)
+    table_vars.to_csv(RES / "dataset.csv", index=False, encoding="utf-8")
+    print("  -> results/dataset.csv")
+
     hi = HealthIndicator(selected).fit(train)
     for df in (train, test):
         df["HI_raw"] = hi.raw(df)

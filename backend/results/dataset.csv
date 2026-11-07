@@ -1,0 +1,25 @@
+variable,type,description,min,max,moyenne,mediane,ecart_type,valeurs_distinctes,constant,retenu
+set1,réglage,Réglage opérationnel 1,-0.0087,0.0087,0.0,0.0,0.0022,158,False,False
+set2,réglage,Réglage opérationnel 2,-0.0006,0.0006,0.0,0.0,0.0003,13,False,False
+set3,réglage,Réglage opérationnel 3,100.0,100.0,100.0,100.0,0.0,1,False,False
+s1,capteur,T2 — Température entrée fan (°R),518.67,518.67,518.67,518.67,0.0,1,True,False
+s2,capteur,T24 — Température sortie LPC (°R),641.21,644.53,642.6809,642.64,0.5001,310,False,True
+s3,capteur,T30 — Température sortie HPC (°R),1571.04,1616.91,1590.5231,1590.1,6.1311,3012,False,True
+s4,capteur,T50 — Température sortie LPT (°R),1382.25,1441.49,1408.9338,1408.04,9.0006,4051,False,True
+s5,capteur,P2 — Pression entrée fan (psia),14.62,14.62,14.62,14.62,0.0,1,True,False
+s6,capteur,P15 — Pression bypass (psia),21.6,21.61,21.6098,21.61,0.0014,2,True,False
+s7,capteur,P30 — Pression sortie HPC (psia),549.85,556.06,553.3677,553.44,0.8851,513,False,True
+s8,capteur,Nf — Vitesse physique fan (rpm),2387.9,2388.56,2388.0967,2388.09,0.071,53,False,True
+s9,capteur,Nc — Vitesse physique core (rpm),9021.73,9244.59,9065.2429,9060.66,22.0829,6403,False,False
+s10,capteur,epr — Rapport de pression moteur,1.3,1.3,1.3,1.3,0.0,1,True,False
+s11,capteur,Ps30 — Pression statique sortie HPC (psia),46.85,48.53,47.5412,47.51,0.2671,159,False,True
+s12,capteur,phi — Débit carburant / Ps30,518.69,523.38,521.4135,521.48,0.7376,427,False,True
+s13,capteur,NRf — Vitesse corrigée fan (rpm),2387.88,2388.56,2388.0962,2388.09,0.0719,56,False,True
+s14,capteur,NRc — Vitesse corrigée core (rpm),8099.94,8293.72,8143.7527,8140.54,19.0762,6078,False,False
+s15,capteur,BPR — Taux de dilution,8.3249,8.5848,8.4421,8.4389,0.0375,1918,False,True
+s16,capteur,farB — Rapport carburant/air brûleur,0.03,0.03,0.03,0.03,0.0,1,True,False
+s17,capteur,htBleed — Enthalpie de prélèvement,388.0,400.0,393.2107,393.0,1.5488,13,False,True
+s18,capteur,Nf_dmd — Vitesse fan demandée,2388.0,2388.0,2388.0,2388.0,0.0,1,True,False
+s19,capteur,PCNfR_dmd — Vitesse fan corrigée demandée,100.0,100.0,100.0,100.0,0.0,1,True,False
+s20,capteur,W31 — Débit air refroidissement HPT,38.14,39.43,38.8163,38.83,0.1807,120,False,True
+s21,capteur,W32 — Débit air refroidissement LPT,22.8942,23.6184,23.2897,23.2979,0.1083,4745,False,True

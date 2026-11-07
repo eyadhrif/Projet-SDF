@@ -12,6 +12,7 @@ import pytest
 from conftest import ROOT, BACKEND, RESULTS, MODELS
 
 NAMES = ("fmds", "health", "rul", "engines")
+# dataset.json (A2) est déterministe ; run_info.json change à chaque exécution (date, durée)
 
 
 def _strict_load(path):
@@ -33,7 +34,7 @@ def _nombres(o):
 
 
 # ------------------------------------------------------------- validité
-@pytest.mark.parametrize("name", NAMES)
+@pytest.mark.parametrize("name", NAMES + ("dataset", "run_info"))
 def test_json_valide_sans_nan_ni_infini(name):
     d = _strict_load(RESULTS / f"{name}.json")
     assert d
@@ -123,7 +124,7 @@ def _copie_et_lance(tmp_path, *args, garder_lstm):
                        capture_output=True, text=True, encoding="utf-8", timeout=1200)
     assert p.returncode == 0, p.stderr[-2000:]
     res = tmp_path / "backend" / "results"
-    return {n: _strict_load(res / f"{n}.json") for n in NAMES + ("run_info",)}
+    return {n: _strict_load(res / f"{n}.json") for n in NAMES + ("run_info", "dataset")}
 
 
 @pytest.mark.slow
@@ -132,6 +133,7 @@ def test_run_all_reproduit_exactement_les_resultats(tmp_path, results):
     new = _copie_et_lance(tmp_path, garder_lstm=True)
     for n in NAMES:
         assert new[n] == results[n], f"{n}.json diffère"
+    assert new["dataset"] == _strict_load(RESULTS / "dataset.json")
     assert new["run_info"]["lstm"].startswith("rechargé")
 
 

@@ -1,6 +1,9 @@
 // Couche d'accès aux données : API FastAPI (mode normal) ou JSON intégrés (mode static)
 const STATIC = import.meta.env.MODE === 'static'
-const files = STATIC ? import.meta.glob('../../backend/results/*.json', { eager: true, import: 'default' }) : {}
+// Seuls les 4 JSON affichés sont intégrés : run_info.json (date d'exécution) et dataset.json
+// rendraient sinon la version autonome différente à chaque exécution de run_all.py
+const files = STATIC ? import.meta.glob('../../backend/results/{fmds,health,rul,engines}.json',
+  { eager: true, import: 'default' }) : {}
 const pick = (n) => files[`../../backend/results/${n}.json`]
 
 export async function get(path) {

@@ -90,3 +90,61 @@ def test_table_de_durees_de_vie(fd001):
     # durée = dernier cycle observé
     np.testing.assert_array_equal(life[life.source == "test"].time.values,
                                   test.groupby("unit").cycle.max().values)
+
+
+# ------------------------------------------------------------- description du jeu de données (A2)
+from pipeline.data import describe_dataset  # noqa: E402
+from conftest import RESULTS  # noqa: E402
+
+SELECTED = ["s2", "s3", "s4", "s7", "s8", "s11", "s12", "s13", "s15", "s17", "s20", "s21"]
+
+
+@pytest.fixture(scope="module")
+def description(fd001):
+    train, test, rul = fd001
+    return describe_dataset(train, test, rul, SELECTED)
+
+
+def test_description_tailles_et_series(description):
+    d, _ = description
+    assert d["tailles"] == {"lignes_entrainement": 20631, "lignes_test": 13096, "moteurs_entrainement": 100,
+                            "moteurs_test": 100, "colonnes_fichier": 26, "capteurs": 21, "reglages": 3}
+    assert (d["duree_de_vie_entrainement"]["min"], d["duree_de_vie_entrainement"]["max"]) == (128, 362)
+    assert d["longueur_series_test"]["min"] == 31 and d["longueur_series_test"]["max"] == 303
+    assert d["longueur_series_test"]["moyenne"] == pytest.approx(131, abs=0.05)
+    assert (d["rul_reel_test"]["min"], d["rul_reel_test"]["max"]) == (7, 145)
+    assert d["rul_reel_test"]["moyenne"] == pytest.approx(75.5, abs=0.05)
+    assert d["fiabilite"] == {"unites": 200, "defaillances": 100, "censures_a_droite": 100}
+
+
+def test_description_statistiques_recalculees(fd001, description):
+    train = fd001[0]
+    _, table = description
+    for _, r in table.iterrows():
+        s = train[r.variable]
+        assert r["min"] == round(s.min(), 4) and r["max"] == round(s.max(), 4)
+        assert r.moyenne == pytest.approx(s.mean(), abs=1e-4)
+        assert r.ecart_type == pytest.approx(s.std(), abs=1e-4)
+        assert r.valeurs_distinctes == s.nunique()
+    num = table[["min", "max", "moyenne", "mediane", "ecart_type"]].to_numpy(float)
+    assert not np.any((num == 0) & np.signbit(num)), "zéro négatif (-0.0) après arrondi"
+
+
+def test_description_capteurs_constants_et_retenus(description):
+    d, table = description
+    assert d["capteurs_constants"] == ["s1", "s5", "s6", "s10", "s16", "s18", "s19"]
+    assert d["capteurs_retenus"] == SELECTED
+    assert len(table) == 24 and (table.type == "réglage").sum() == 3
+    assert not table[table.type == "réglage"].constant.any()          # set3 est fixe mais n'est pas un capteur
+    assert not (table.constant & table.retenu).any()
+    assert table[table.retenu].variable.tolist() == SELECTED
+
+
+def test_fichiers_dataset_exportes(description):
+    import json
+    import pandas as pd
+    d, table = description
+    assert json.loads((RESULTS / "dataset.json").read_text(encoding="utf-8")) == json.loads(json.dumps(d))
+    csv = pd.read_csv(RESULTS / "dataset.csv")
+    assert list(csv.columns) == list(table.columns) and len(csv) == 24
+    pd.testing.assert_frame_equal(csv, table.reset_index(drop=True), check_dtype=False)

@@ -54,6 +54,57 @@ def load_fd001():
     return train, test, rul
 
 
+MIN_UNIQUE = 10   # en dessous : capteur (quasi) constant (même règle que features.drop_constant)
+
+
+def _stats(x):
+    x = pd.Series(x, dtype=float)
+    r = lambda v: round(float(v), 4) + 0.0          # + 0.0 : pas de « -0.0 » après arrondi
+    return {"min": r(x.min()), "max": r(x.max()), "moyenne": r(x.mean()), "mediane": r(x.median()),
+            "ecart_type": r(x.std())}
+
+
+def describe_dataset(train: pd.DataFrame, test: pd.DataFrame, rul: pd.DataFrame, selected=()):
+    """Description du jeu de données pour le rapport (A2).
+
+    Retourne (dict pour dataset.json, DataFrame des variables pour dataset.csv).
+    Les statistiques des variables sont calculées sur le jeu d'entraînement.
+    """
+    life = train.groupby("unit")["cycle"].max()
+    test_len = test.groupby("unit")["cycle"].max()
+    rows = []
+    for v in ["set1", "set2", "set3"] + SENSORS:
+        s = train[v]
+        n_unique = int(s.nunique())
+        capteur = v in SENSORS
+        rows.append({
+            "variable": v, "type": "capteur" if capteur else "réglage",
+            "description": SENSOR_INFO.get(v, f"Réglage opérationnel {v[-1]}"),
+            **_stats(s), "valeurs_distinctes": n_unique,
+            "constant": bool(capteur and n_unique < MIN_UNIQUE),
+            "retenu": v in set(selected),
+        })
+    table = pd.DataFrame(rows)
+    capteurs = table[table.type == "capteur"]
+    desc = {
+        "source": "NASA C-MAPSS FD001 (Saxena et al., 2008) : 1 condition opératoire, 1 mode de défaillance (HPC)",
+        "tailles": {
+            "lignes_entrainement": int(len(train)), "lignes_test": int(len(test)),
+            "moteurs_entrainement": int(train.unit.nunique()), "moteurs_test": int(test.unit.nunique()),
+            "colonnes_fichier": 26, "capteurs": len(SENSORS), "reglages": 3,
+        },
+        "duree_de_vie_entrainement": _stats(life),
+        "longueur_series_test": _stats(test_len),
+        "rul_reel_test": _stats(rul["RUL"]),
+        "fiabilite": {"unites": int(len(life) + len(test_len)), "defaillances": int(len(life)),
+                      "censures_a_droite": int(len(test_len))},
+        "capteurs_constants": capteurs[capteurs.constant].variable.tolist(),
+        "capteurs_retenus": [s for s in SENSORS if s in set(selected)],
+        "variables": rows,
+    }
+    return desc, table
+
+
 def lifetime_table(train: pd.DataFrame, test: pd.DataFrame) -> pd.DataFrame:
     """Table de durées de vie pour l'analyse de fiabilité.
 
