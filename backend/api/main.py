@@ -61,7 +61,15 @@ def fleet():
 if DIST.exists():
     app.mount("/assets", StaticFiles(directory=DIST / "assets"), name="assets")
 
+    DIST_ROOT = DIST.resolve()
+
     @app.get("/{path:path}", include_in_schema=False)
     def spa(path: str):
-        f = DIST / path
-        return FileResponse(f if path and f.is_file() else DIST / "index.html")
+        # Une route /api/… inconnue est une erreur d'API (404 JSON), pas une page du dashboard
+        if path == "api" or path.startswith("api/"):
+            raise HTTPException(404, f"Route /{path} inconnue")
+        f = (DIST_ROOT / path).resolve()
+        # Refuser toute remontée d'arborescence (../) hors de frontend/dist
+        if not f.is_relative_to(DIST_ROOT):
+            raise HTTPException(404, "Fichier introuvable")
+        return FileResponse(f if path and f.is_file() else DIST_ROOT / "index.html")
