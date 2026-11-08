@@ -82,7 +82,7 @@ def commit():
     try:
         h = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=RACINE, capture_output=True,
                            text=True).stdout.strip() or "?"
-        sale = subprocess.run(["git", "status", "--porcelain", "--untracked-files=no"], cwd=RACINE,
+        sale = subprocess.run(["git", "status", "--porcelain", "--untracked-files=no", "--", ".", ":!tests/RAPPORT_TESTS.md"], cwd=RACINE,
                               capture_output=True, text=True).stdout.strip()
         return f"{h} + modifications non commitées" if sale else h
     except OSError:
