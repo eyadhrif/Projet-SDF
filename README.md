@@ -3,6 +3,7 @@
 **Binôme :** Eya DHRIF & Salma MOUEDDEB · **Encadrant :** M. Fayçal Ben Hmida · GMAM 3, ENSIT
 **Données :** NASA C-MAPSS, sous-ensemble FD001 (turboréacteurs, une condition opératoire, un mode de défaillance — dégradation du compresseur HPC)
 **Livrable :** dashboard web interactif (FastAPI + React) et son code source
+**Dépôt :** [github.com/eyadhrif/Projet-SDF](https://github.com/eyadhrif/Projet-SDF) · binôme Eya DHRIF et Salma MOUEDDEB
 
 ---
 
