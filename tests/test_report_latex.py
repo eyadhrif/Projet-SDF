@@ -15,8 +15,8 @@ import pytest
 
 from test_report import REPORT, SOURCE, NODE, avec_node, verifier_pdf_binaire
 
-CHAPITRES = ["04_cadre.md", "05_donnees.md", "06_methodologie.md", "07_architecture.md", "08_validation.md",
-             "09_discussion.md", "10_perspectives.md"]
+CHAPITRES = ["04_cadre_donnees.md", "05_methodologie.md", "06_evaluation_visualisation.md",
+             "07_discussion_perspectives.md"]
 LATEX = REPORT / "latex"
 
 
@@ -24,12 +24,12 @@ LATEX = REPORT / "latex"
 def test_ordre_des_parties():
     noms = [p.name for p in sorted(SOURCE.glob("*.md"))]
     assert noms[:4] == ["00_titre.md", "01_front.md", "02_listes.md", "03_introduction_generale.md"]
-    assert noms[4:11] == CHAPITRES
-    assert noms[11:] == ["11_conclusion_generale.md", "12_bibliographie.md", "13_glossaire.md", "14_annexes.md",
-                         "15_resumes.md"]
+    assert noms[4:8] == CHAPITRES
+    assert noms[8:] == ["08_conclusion_generale.md", "09_bibliographie.md", "10_annexes.md", "11_resumes.md"]
     front = (SOURCE / "01_front.md").read_text(encoding="utf-8")
     assert "# Dédicaces {-}" in front and "# Remerciements {-}" in front and ":::dedicace" in front
-    assert ":::encadre" in (SOURCE / "03_introduction_generale.md").read_text(encoding="utf-8")
+    # remarque de relecture : introduction homogène, sans encadré gris
+    assert ":::encadre" not in (SOURCE / "03_introduction_generale.md").read_text(encoding="utf-8")
 
 
 @pytest.mark.parametrize("nom", CHAPITRES)
@@ -45,18 +45,18 @@ def test_chaque_chapitre_a_introduction_et_conclusion(nom):
 
 
 def test_resumes_trilingues_et_glossaire():
-    md = (SOURCE / "15_resumes.md").read_text(encoding="utf-8")
+    md = (SOURCE / "11_resumes.md").read_text(encoding="utf-8")
     assert "## Résumé {-}" in md and "## Abstract {-}" in md and "## ملخص {-}" in md and ":::arabe" in md
     for cle in ("n_moteurs_test", "mttf", "dispo", "t_opt_arrondi", "gain_preventif", "n_retenus", "gb_auc",
                 "deg_rmse", "lstm_rmse"):
         assert md.count("{{" + cle + "}}") == 3, f"{cle} : mêmes chiffres dans les trois langues"
-    glo = (SOURCE / "13_glossaire.md").read_text(encoding="utf-8")
+    glo = (SOURCE / "02_listes.md").read_text(encoding="utf-8")   # liste des abréviations
     assert len(re.findall(r"^\*\*[^*]+\*\* :", glo, flags=re.M)) >= 20
 
 
 def test_page_de_garde_et_logos():
     m = json.loads((REPORT / "metadonnees.json").read_text(encoding="utf-8"))
-    assert m["auteurs"] == ["Eya DHRIF", "Salma MOUEDDEB"] and "Ben Hmida" in m["encadrant"]
+    assert m["auteurs"] == ["Salma Moueddeb", "Eya Dhrif"] and "Ben Hmida" in m["encadrant"]
     for logo in ("logo_univ_tunis.png", "logo_emblem.png", "logo_ensit.png"):
         assert (REPORT / "logos" / logo).stat().st_size > 1000
 
@@ -105,7 +105,9 @@ def test_generation_latex_coherente():
     assert cites == bibitems and len(bibitems) == nb
     for img in re.findall(r"\\includegraphics(?:\[[^\]]*\])?\{([^}]+)\}", tex):
         assert (LATEX / img).exists(), img
-    assert len(re.findall(r"\\begin\{figure\}", tex)) == 25 and len(re.findall(r"\\begin\{table\}", tex)) == 11
+    md = "".join(p.read_text(encoding="utf-8") for p in SOURCE.glob("*.md"))
+    assert len(re.findall(r"\\begin\{figure\}", tex)) == len(re.findall(r"^!figure\[", md, flags=re.M))
+    assert len(re.findall(r"\\begin\{table\}", tex)) == len(re.findall(r"^!tableau\[", md, flags=re.M))
     for env in ("figure", "table", "equation", "itemize", "enumerate", "center", "titlepage", "multicols",
                 "problembox", "thebibliography"):
         assert tex.count(f"\\begin{{{env}}}") == tex.count(f"\\end{{{env}}}"), env

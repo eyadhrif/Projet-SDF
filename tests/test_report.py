@@ -27,6 +27,8 @@ IDENTIFIANTS = [
     r"FD00\d", r"\bs\d{1,2}\b", r"\bset\d\b", r"\b[BP]\d{1,2}\b", r"\bt90\b", r"\b[23]P\b",
     r"\b(?:SET|FMDS|PDM|RUL|WEB)-0\d\b", r"\bVersions? [123](?: et [123])?\b", r"\bGMAM 3\b", r"\bNF EN 13306\b",
     r"(?m)^\s*\d+\.\s",                       # numéros de liste ordonnée (mise en forme)
+    r"\(\*\*\d\*\*\)",                        # numéros d'objectifs « (**1**) » (mise en forme)
+    r"niveaux nominaux de 50, 80 et 90",      # niveaux nominaux choisis (entrées de la calibration, pas des résultats)
 ]
 
 
@@ -78,14 +80,20 @@ def test_toutes_les_valeurs_citees_existent():
 
 
 def test_chaque_figure_et_chaque_tableau_sont_inclus():
+    """Version courte (4 chapitres) : le rapport retient une sélection des figures et tableaux générés.
+
+    Chaque figure ou tableau inclus doit exister (généré par le code ou capture du tableau de bord)
+    et être cité dans le texte.
+    """
     import report_figures
     import report_tables  # noqa: F401
     md = "".join(_sources().values())
     figs = set(re.findall(r"^!figure\[([\w-]+)\]", md, flags=re.M))
     tabs = set(re.findall(r"^!tableau\[([\w-]+)\]", md, flags=re.M))
-    assert {n for n, _ in report_figures.FIGURES} <= figs
-    assert {p.stem for p in (REPORT / "tables").glob("*.md")} == tabs
-    assert {f"dashboard_{p}" for p in ("overview", "fiab", "mon", "rul")} <= figs
+    captures = {f"dashboard_{p}" for p in ("overview", "fiab", "mon", "rul")}
+    assert figs and figs <= {n for n, _ in report_figures.FIGURES} | captures, figs
+    assert tabs and tabs <= {p.stem for p in (REPORT / "tables").glob("*.md")}, tabs
+    assert figs & captures, "au moins une capture du tableau de bord"
     for nom in figs:
         assert f"[@fig:{nom}]" in md, f"figure {nom} jamais citée"
     for nom in tabs:
@@ -105,22 +113,19 @@ PASSE = [r"\bnous avons\b", r"\b(?:a|ont|avait|avaient) été\b", r"\b(?:a|ont) 
 
 
 def test_perspectives_jamais_au_passe():
-    md = (SOURCE / "10_perspectives.md").read_text(encoding="utf-8")
-    assert "Aucun d'entre eux n'est réalisé à ce stade" in md
-    fautes = [m.group(0) for p in PASSE for m in re.finditer(p, md, flags=re.I)]
+    """Section « Travaux futurs » du chapitre Discussion et perspectives (version courte)."""
+    md = (SOURCE / "07_discussion_perspectives.md").read_text(encoding="utf-8")
+    futurs = md.split("## Travaux futurs")[1].split("\n## ")[0]
+    assert "aucun n'est réalisé à ce stade" in futurs
+    fautes = [m.group(0) for p in PASSE for m in re.finditer(p, futurs, flags=re.I)]
     assert not fautes, fautes
-    # chaque perspective suit le format en huit points (hors Introduction et Conclusion du chapitre)
-    blocs = [b for b in re.split(r"^## ", md, flags=re.M)[1:] if not b.startswith(("Introduction", "Conclusion"))]
-    assert len(blocs) >= 12
-    for b in blocs:
-        points = re.findall(r"^- \*\*([^*]+?) :\*\*", b, flags=re.M)
-        assert points == ["Développement", "Motivation", "Limite actuelle", "Données et ressources", "Méthodes",
-                          "Validation", "Bénéfices attendus", "Difficultés"], b.splitlines()[0]
+    # chaque travail futur : un titre en gras puis sa description
+    assert len(re.findall(r"^- \*\*[^*]+\.\*\* \S", futurs, flags=re.M)) >= 5
 
 
 def test_hypotheses_signalees():
     md = "".join(_sources().values())
-    assert "**simulés**" in md and "Hypothèse forte" in md
+    assert "**simulés**" in md and "Hypothèses simulées" in md
     assert "{{h_par_cycle}} h" in md                  # conversion cycle -> heures explicitement citée
 
 
@@ -136,7 +141,10 @@ def test_construction_verification():
     assert p.returncode == 0, p.stdout + p.stderr
     v = json.loads((REPORT / "build" / "verification.json").read_text(encoding="utf-8"))
     assert v["erreurs"] == []
-    assert v["figures"] == 25 and v["tableaux"] == 11 and v["references"] >= 30 and v["equations"] >= 15
+    md = "".join(_sources().values())
+    assert v["figures"] == len(re.findall(r"^!figure\[", md, flags=re.M))
+    assert v["tableaux"] == len(re.findall(r"^!tableau\[", md, flags=re.M))
+    assert v["references"] >= 30 and v["equations"] >= 10
 
 
 @avec_node
@@ -148,7 +156,7 @@ def test_construction_du_pdf(tmp_path):
     assert p.returncode == 0, p.stdout + p.stderr
     verifier_pdf_binaire(pdf.read_bytes())
     v = json.loads((REPORT / "build" / "verification.json").read_text(encoding="utf-8"))
-    assert v["pages"] >= 30
+    assert v["pages"] >= 25
 
 
 def verifier_pdf_binaire(data):
