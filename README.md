@@ -47,11 +47,25 @@ npm run build          # -> frontend/dist, servi par FastAPI
 npm run build:static   # -> frontend/dist-static/index.html (version autonome)
 ```
 
+### Rapport scientifique (Version 1)
+
+Le rapport est dans [`report/Rapport_V1_FMDS_Eya_Salma.pdf`](report/Rapport_V1_FMDS_Eya_Salma.pdf) (51 pages). Ses sources sont en Markdown avec formules LaTeX (`report/source/`), et **aucun chiffre n'y est tapé à la main** : le texte cite des valeurs générées depuis `backend/results/`.
+
+```bash
+cd backend
+python report_figures.py   # -> report/figures (21 figures, PNG 300 dpi + PDF)
+python report_tables.py    # -> report/tables (Markdown + LaTeX) et report/generated/valeurs.json
+cd ../report
+npm install
+node build.mjs             # -> Rapport_V1_FMDS_Eya_Salma.pdf (vérifications comprises)
+```
+
 ### Lancer les tests
 
 ```bash
 pip install -r backend/requirements-dev.txt
 cd frontend && npm install && npx playwright install chromium && cd ..
+cd report && npm install && cd ..
 run_tests.bat              # Windows : tests rapides + dashboard (Playwright)
 run_tests.bat --slow       # suite complète, y compris réentraînements (~10 min)
 ./run_tests.sh [--slow]    # Linux / macOS / Git Bash
@@ -74,10 +88,14 @@ backend/
   pipeline/rul_degradation.py  RUL-01  Modèle de dégradation bayésien                         Eya
   pipeline/rul_lstm.py         RUL-02  Modèle LSTM (PyTorch)                                  Salma
   run_all.py                   RUL-03  Orchestration, comparaison, export JSON                 Eya + Salma
+  report_figures.py                    Figures du rapport (depuis les JSON)                    Eya + Salma
+  report_tables.py                     Tableaux et valeurs du rapport (depuis les JSON)        Eya + Salma
   api/main.py                  WEB-01  API FastAPI : /api/fmds, /api/health, /api/rul, /api/engines/{id}   Eya
   models/                      Modèles sérialisés (joblib, .pt)
   results/                     Résultats JSON consommés par le dashboard
 frontend/src/                  WEB-02  React + Recharts : 4 pages                             Salma
+report/                        Rapport V1 : source/, figures/, tables/, build.mjs, PDF        Eya + Salma
+tests/                         Suite de tests pytest (+ frontend/tests : Playwright)
 ```
 
 ---
@@ -176,6 +194,8 @@ La Weibull 3P et la log-normale sont équivalentes (ΔAIC < 1). On retient la We
 **Limites.**
 - Le modèle de dégradation est biaisé vers des prédictions tardives (+13,5 cycles)
 - Son intervalle 10–90 % ne couvre le RUL réel que dans 54 % des cas, ce qui veut dire que l'incertitude est sous-estimée
+- Calibration (A6, sans changer le modèle) : couverture de 35 % pour l'intervalle 25–75 % et de 59 % pour 5–95 % ; biais le plus fort (+21,4 cycles) pour un RUL réel entre 50 et 100 cycles
+- La Weibull 3P retenue est ajustée sur les seules défaillances, sans les moteurs censurés (voir le rapport, chapitre 8)
 - **Piste d'amélioration :** remplacer le polynôme par un modèle exponentiel, comme `exponentialDegradationModel` de la PdM Toolbox
 
 ---

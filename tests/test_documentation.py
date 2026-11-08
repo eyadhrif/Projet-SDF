@@ -62,6 +62,10 @@ def _attendus():
         "RUL moyenne": ligne_rul("Moyenne des deux", "ensemble"),
         "biais dégradation": f"prédictions tardives ({fr(m['deg']['bias'], 1, True)} cycles)",
         "couverture": f"dans {fr(r['deg_info']['coverage_10_90'], 0)} % des cas",
+        "calibration (A6)": (f"couverture de {fr(r['deg_info']['calibration'][0]['couverture'], 0)} % pour l'intervalle 25–75 % "
+                             f"et de {fr(r['deg_info']['calibration'][2]['couverture'], 0)} % pour 5–95 %"),
+        "biais par tranche (A6)": f"biais le plus fort ({fr(r['deg_info']['biais']['par_tranche'][1]['biais'], 1, True)} cycles)",
+        "section rapport": "Le rapport est dans",
     }
 
 
@@ -80,3 +84,12 @@ def test_format_fr():
     assert fr(13.52, 1, True) == "+13,5"
     assert fr(3742.7, 0) == "3743"
     assert fr(-2.25, 1, True) == "-2,3"
+
+
+def test_changelog_du_rapport_conforme_au_json():
+    log = (ROOT / "report" / "CHANGELOG.md").read_text(encoding="utf-8")
+    f, r = load_json("fmds"), load_json("rul")
+    c = [fr(x["couverture"], 0) for x in r["deg_info"]["calibration"]]
+    assert f"B50 = {fr(f['fiabilite']['b50'], 1)} cycles" in log
+    assert f"couvertures empiriques de {c[0]} %, {c[1]} % et {c[2]} %" in log
+    assert f"Biais ({fr(r['metrics']['deg']['bias'], 1, True)} cycles)" in log

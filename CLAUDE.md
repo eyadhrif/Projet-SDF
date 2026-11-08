@@ -21,14 +21,14 @@ Context file for Claude Code. Read this first before touching the project.
 - Pipeline, API and dashboard all run end to end
 - Tested from a clean unzip: API returns 200, Swagger works, the standalone HTML opens offline with no console errors
 - Work follows `PROMPT_MAITRE_RAPPORT.md` (Phase 0 tests → Phase A code consolidation → Phase B report). Commit messages in French, one commit per step
-- **Phase 0 (exhaustive tests) is done on branch `corrections-defauts`** (not yet merged into `main`). Defects D1–D5 were fixed there:
-  - D1/D2: `api/main.py` catch-all route served any file via `../` and returned HTML for unknown `/api/…` routes → now 404
-  - D3: README SVM test recall was 0.636 (wrong) → 0.621 (`health.json`: 0.6205)
-  - D4: LSTM retraining is not reproducible across machines → the committed `models/lstm_rul.pt` is the reference
-  - D5: `requirements.txt` now states numpy>=2.0, pandas>=2.2; exact versions in `backend/requirements-lock.txt`
-- **Open defects (tests marked expected-failure until fixed):**
-  - D6: browser Back button changes the hash but not the page (`App.jsx` reads the hash only at start-up, no `hashchange` listener)
-  - D7: horizontal overflow at 390 px width (the `.tag` badge has `white-space: nowrap` and widens the `1fr` column of `.app`)
+- **All three phases of `PROMPT_MAITRE_RAPPORT.md` are done** (merged into `main`, tag `v1.0-rapport`):
+  - Phase 0: full test suite (pytest + Playwright), `tests/RAPPORT_TESTS.md`; coverage ≈ 100 % on `backend/pipeline` and `backend/api`
+  - Defects fixed: D1/D2 API path traversal and unknown `/api/…` routes (now 404); D3 wrong SVM recall in README (0.621); D4 LSTM not reproducible across machines (committed `models/lstm_rul.pt` is the reference); D5 minimum versions + `backend/requirements-lock.txt`; D6 Back button (`hashchange` listener in `App.jsx`); D7 horizontal overflow at 390 px (`minmax(0, 1fr)`)
+  - Phase A: A1 B50 (199.9) exported and shown; A2 `results/dataset.json` + `.csv`; A3 `backend/report_figures.py` → `report/figures` (21 figures); A4 `backend/report_tables.py` → `report/tables` (11 tables, md + tex) and `report/generated/valeurs.json`; A5 `run_all.py` reloads the reference LSTM by default (`--reentrainer-lstm` to retrain), seeds documented, `results/run_info.json`; A6 degradation calibration (coverage 35/54/59 % at nominal 50/80/90 %, bias by RUL range) in `rul.json` and on the RUL page
+  - Phase B: `report/Rapport_V1_FMDS_Eya_Salma.pdf` (51 pages), built from `report/source/*.md` by `report/build.mjs` (marked + KaTeX → HTML → PDF with Chromium). No LaTeX distribution on the PC; downloading Tectonic was blocked. Report numbers are never typed by hand: the text cites `{{key}}` from `valeurs.json`, enforced by `tests/test_report.py`
+  - Limit found while writing: the retained Weibull 3P is fitted on the 100 failures only (no censoring); discussed in the report, chapter 8
+- **Report change workflow:** edit code → `python run_all.py` → `python report_figures.py` → `python report_tables.py` → rebuild `frontend` (`npm run build` and `build:static`, copy to `dashboard_autonome.html`) → `node report/build.mjs` → `run_tests.bat --slow`. Tests fail if any generated file is stale
+- **Machine note:** Avast and 360 antivirus run on Eya's PC; on 8 Nov 2026 the fast test suite took 55 min instead of ~75 s for one run (probably file scanning)
 - **Windows long paths:** torch 2.15 fails to install in a deep folder (260-char limit, `LongPathsEnabled = 0` on Eya's PC). Keep the venv in a short path
 - **Not yet on GitHub.** The plan is a private repo `eyadhrif/SdF-FMDS-Maintenance-Predictive`, then invite Salma as a collaborator with Write access. Creating the repo from the cloud session was blocked, so Eya creates it empty on github.com, then push:
   ```bash
@@ -72,6 +72,9 @@ tests/                        pytest suite, one file per module (+ test_api, tes
   RAPPORT_TESTS.md            latest test report (regenerate and commit with every ticket)
 run_tests.bat / run_tests.sh  run everything (add --slow for retraining + full run_all.py)
 pytest.ini                    marker `slow`, pythonpath = backend
+report/                       Phase B report: source/*.md, figures/ (A3), tables/ (A4), generated/valeurs.json,
+                              captures/ (dashboard screenshots), bibliographie.json, build.mjs, CHANGELOG.md,
+                              Rapport_V1_FMDS_Eya_Salma.pdf
 ```
 
 ### Run
@@ -140,10 +143,9 @@ Rules: never change a test to make it pass without a written reason; known defec
 ## 5. Possible next steps
 
 1. Push to GitHub and invite Salma (see section 2)
-2. Draft the submission email to the professor with the Drive or GitHub link
-3. Optional: a short French written report (rapport) as a doc
-4. Optional: improve the degradation model with an exponential basis to reduce bias and improve coverage. Rerun `run_all.py`, then rebuild both frontends
-5. Later and separate: the group portfolio (due 6 Dec), using `Feuille de route pour portfolio numérique_2025.pdf`
+2. Send the report PDF, the standalone dashboard and the repository link to the professor
+3. Version 2 of the report (see `report/CHANGELOG.md` and the report's Perspectives chapter): exponential / Wiener degradation model, calibrated intervals, Weibull 3P fitted with censoring, FD002/FD004
+4. Later and separate: the group portfolio (due 6 Dec), using `Feuille de route pour portfolio numérique_2025.pdf`
 
 ## 6. Notes
 
