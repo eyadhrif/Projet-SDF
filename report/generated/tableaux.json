@@ -1,0 +1,13 @@
+{
+ "donnees_tailles": "Tailles exactes et statistiques du jeu C-MAPSS FD001",
+ "donnees_capteurs": "Variables de FD001 (statistiques sur le jeu d'entraînement)",
+ "fiabilite_modeles": "Modèles de fiabilité estimés sur les 100 durées de défaillance",
+ "fiabilite_adequation": "Adéquation des lois candidates (MV sur les durées complètes)",
+ "fiabilite_indicateurs": "Indicateurs de fiabilité",
+ "fmds_maintenabilite_disponibilite": "Maintenabilité, disponibilité et remplacement préventif (temps de réparation simulés)",
+ "sante_classifieurs": "Classification normal / critique (RUL ≤ 30 cycles)",
+ "rul_metriques": "Performances des modèles de RUL sur les 100 moteurs de test",
+ "rul_calibration": "Calibration des intervalles du modèle de dégradation",
+ "rul_biais_tranches": "Biais du modèle de dégradation selon le RUL réel",
+ "hypotheses_parametres": "Hypothèses et paramètres des méthodes"
+}

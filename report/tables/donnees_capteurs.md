@@ -1,0 +1,26 @@
+| Variable | Description | Moyenne | Écart-type | Valeurs distinctes | Statut |
+|---|---|---:|---:|---:|---|
+| set1 | Réglage opérationnel 1 | 0,000 | 0,002 | 158 | réglage |
+| set2 | Réglage opérationnel 2 | 0,000 | 0,000 | 13 | réglage |
+| set3 | Réglage opérationnel 3 | 100,000 | 0,000 | 1 | réglage |
+| s1 | T2 — Température entrée fan (°R) | 518,670 | 0,000 | 1 | constant, écarté |
+| s2 | T24 — Température sortie LPC (°R) | 642,681 | 0,500 | 310 | retenu |
+| s3 | T30 — Température sortie HPC (°R) | 1 590,523 | 6,131 | 3 012 | retenu |
+| s4 | T50 — Température sortie LPT (°R) | 1 408,934 | 9,001 | 4 051 | retenu |
+| s5 | P2 — Pression entrée fan (psia) | 14,620 | 0,000 | 1 | constant, écarté |
+| s6 | P15 — Pression bypass (psia) | 21,610 | 0,001 | 2 | constant, écarté |
+| s7 | P30 — Pression sortie HPC (psia) | 553,368 | 0,885 | 513 | retenu |
+| s8 | Nf — Vitesse physique fan (rpm) | 2 388,097 | 0,071 | 53 | retenu |
+| s9 | Nc — Vitesse physique core (rpm) | 9 065,243 | 22,083 | 6 403 | non retenu |
+| s10 | epr — Rapport de pression moteur | 1,300 | 0,000 | 1 | constant, écarté |
+| s11 | Ps30 — Pression statique sortie HPC (psia) | 47,541 | 0,267 | 159 | retenu |
+| s12 | phi — Débit carburant / Ps30 | 521,414 | 0,738 | 427 | retenu |
+| s13 | NRf — Vitesse corrigée fan (rpm) | 2 388,096 | 0,072 | 56 | retenu |
+| s14 | NRc — Vitesse corrigée core (rpm) | 8 143,753 | 19,076 | 6 078 | non retenu |
+| s15 | BPR — Taux de dilution | 8,442 | 0,038 | 1 918 | retenu |
+| s16 | farB — Rapport carburant/air brûleur | 0,030 | 0,000 | 1 | constant, écarté |
+| s17 | htBleed — Enthalpie de prélèvement | 393,211 | 1,549 | 13 | retenu |
+| s18 | Nf_dmd — Vitesse fan demandée | 2 388,000 | 0,000 | 1 | constant, écarté |
+| s19 | PCNfR_dmd — Vitesse fan corrigée demandée | 100,000 | 0,000 | 1 | constant, écarté |
+| s20 | W31 — Débit air refroidissement HPT | 38,816 | 0,181 | 120 | retenu |
+| s21 | W32 — Débit air refroidissement LPT | 23,290 | 0,108 | 4 745 | retenu |

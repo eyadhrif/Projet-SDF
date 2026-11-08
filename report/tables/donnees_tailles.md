@@ -1,0 +1,9 @@
+| Élément | Valeur |
+|---|---|
+| Lignes d'entraînement / de test | 20 631 / 13 096 |
+| Moteurs d'entraînement / de test | 100 / 100 |
+| Variables | 21 capteurs + 3 réglages opérationnels |
+| Durée de vie (entraînement) : min. – max., moyenne | 128 – 362 cycles, 206,3 |
+| Longueur des séries de test : min. – max., moyenne | 31 – 303 cycles, 131,0 |
+| RUL réel de test : min. – max., moyenne | 7 – 145 cycles, 75,5 |
+| Unités pour la fiabilité | 200 (100 défaillances, 100 censures à droite) |

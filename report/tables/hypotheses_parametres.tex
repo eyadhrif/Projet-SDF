@@ -1,0 +1,21 @@
+\begin{table}[htbp]
+\centering
+\caption{Hypothèses et paramètres des méthodes}
+\label{tab:hypotheses_parametres}
+\begin{tabular}{lll}
+\toprule
+Paramètre & Valeur & Module \\
+\midrule
+Conversion temps & 1 cycle ≈ 2 h (1 vol) & fmds.py \\
+Temps de réparation simulés & log-normale, médiane 16 h, σ = 0,6, graine 42 & fmds.py \\
+Coûts relatifs & Cp = 1, Cc = 5 & fmds.py \\
+Capteur constant & moins de 10 valeurs distinctes & features.py \\
+Sélection des capteurs & |tendance| ≥ 0,5 & features.py \\
+Fenêtre glissante (features, lissage du HI) & 10 cycles & features.py \\
+Cible du HI & 1 sur les 10 \% premiers cycles, 0 sur les 10 \% derniers & features.py \\
+Classe « critique » & RUL ≤ 30 cycles ; « surveillance » si P ≥ 0,2 & health.py \\
+Modèle de dégradation & polynôme de degré 2, 1000 tirages, horizon 400 cycles & rul\_degradation.py \\
+LSTM & fenêtres de 30 cycles, cible plafonnée à 125, 2 couches de 64 & rul\_lstm.py \\
+\bottomrule
+\end{tabular}
+\end{table}

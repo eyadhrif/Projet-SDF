@@ -1,0 +1,9 @@
+| Indicateur | Valeur | Source |
+|---|---:|---|
+| MTTF = γ + η·Γ(1 + 1/β) | 206,3 cycles | Weibull 3P |
+| B1 (1 % de défaillances) | 132,6 cycles | Weibull 3P |
+| B10 (10 %) | 151,9 cycles | Weibull 3P |
+| B50 (médiane) | 199,9 cycles | Weibull 3P |
+| Médiane de survie | 202 cycles | Kaplan-Meier |
+| Aire sous la courbe de survie | 214,3 cycles | Kaplan-Meier |
+| Première défaillance observée | 128 cycles | données |

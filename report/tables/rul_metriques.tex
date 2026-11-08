@@ -1,0 +1,15 @@
+\begin{table}[htbp]
+\centering
+\caption{Performances des modèles de RUL sur les 100 moteurs de test}
+\label{tab:rul_metriques}
+\begin{tabular}{lrrrrrr}
+\toprule
+Modèle & RMSE & MAE & Biais & Score NASA & |e| ≤ 15 & Tardives \\
+\midrule
+Dégradation bayésienne (Eya) & 24,47 & 18,98 & +13,5 & 3 743 & 49 \% & 78 \% \\
+LSTM (Salma) & 15,35 & 11,22 & +2,2 & 485 & 68 \% & 58 \% \\
+Moyenne des deux & 16,91 & 13,49 & +7,9 & 600 & 64 \% & 76 \% \\
+\bottomrule
+\end{tabular}
+\par\smallskip\footnotesize Erreur e = RUL prédit − RUL réel, en cycles ; e > 0 : prédiction tardive.
+\end{table}
