@@ -1,7 +1,7 @@
 # Rapport de tests
 
-- **Date :** 2026-11-08 11:27
-- **Commit :** `9bdd2c2`
+- **Date :** 2026-11-08 11:58
+- **Commit :** `ccd17a6`
 - **Mode :** complet (tests lents inclus : réentraînements, run_all.py complet)
 - **Généré par :** `tests/generer_rapport.py` (ne pas modifier à la main)
 
@@ -9,9 +9,9 @@
 
 | Suite | Tests | Réussis | Échecs | Erreurs | Échecs attendus | Ignorés | Durée |
 |---|---|---|---|---|---|---|---|
-| pytest (backend) | 275 | 275 | 0 | 0 | 0 | 0 | 649 s |
-| Playwright (dashboard) | 68 | 68 | 0 | 0 | 0 | 0 | 114 s |
-| **Total** | **343** | **343** | **0** | **0** | **0** | **0** | **763 s** |
+| pytest (backend) | 275 | 275 | 0 | 0 | 0 | 0 | 626 s |
+| Playwright (dashboard) | 68 | 68 | 0 | 0 | 0 | 0 | 82 s |
+| **Total** | **343** | **343** | **0** | **0** | **0** | **0** | **708 s** |
 
 ✅ **Tout est vert**
 
@@ -21,22 +21,22 @@
 
 | Fichier | Tests | Réussis | Échecs | Échecs attendus | Ignorés | Durée |
 |---|---|---|---|---|---|---|
-| `dashboard.spec.js` | 68 | 68 | 0 | 0 | 0 | 114.1 s |
-| `test_api.py` | 25 | 25 | 0 | 0 | 0 | 10.6 s |
-| `test_build.py` | 2 | 2 | 0 | 0 | 0 | 27.9 s |
-| `test_data.py` | 19 | 19 | 0 | 0 | 0 | 1.1 s |
-| `test_documentation.py` | 33 | 33 | 0 | 0 | 0 | 0.1 s |
+| `dashboard.spec.js` | 68 | 68 | 0 | 0 | 0 | 81.9 s |
+| `test_api.py` | 25 | 25 | 0 | 0 | 0 | 4.8 s |
+| `test_build.py` | 2 | 2 | 0 | 0 | 0 | 24.5 s |
+| `test_data.py` | 19 | 19 | 0 | 0 | 0 | 1.0 s |
+| `test_documentation.py` | 33 | 33 | 0 | 0 | 0 | 0.2 s |
 | `test_environnement.py` | 12 | 12 | 0 | 0 | 0 | 0.1 s |
-| `test_features.py` | 16 | 16 | 0 | 0 | 0 | 18.4 s |
-| `test_fmds.py` | 32 | 32 | 0 | 0 | 0 | 3.2 s |
-| `test_health.py` | 13 | 13 | 0 | 0 | 0 | 46.9 s |
-| `test_metrics.py` | 12 | 12 | 0 | 0 | 0 | 0.1 s |
-| `test_report.py` | 12 | 12 | 0 | 0 | 0 | 11.4 s |
-| `test_report_figures.py` | 25 | 25 | 0 | 0 | 0 | 32.2 s |
-| `test_report_tables.py` | 27 | 27 | 0 | 0 | 0 | 0.3 s |
-| `test_results.py` | 19 | 19 | 0 | 0 | 0 | 287.8 s |
-| `test_rul_degradation.py` | 17 | 17 | 0 | 0 | 0 | 8.9 s |
-| `test_rul_lstm.py` | 11 | 11 | 0 | 0 | 0 | 199.6 s |
+| `test_features.py` | 16 | 16 | 0 | 0 | 0 | 18.2 s |
+| `test_fmds.py` | 32 | 32 | 0 | 0 | 0 | 3.6 s |
+| `test_health.py` | 13 | 13 | 0 | 0 | 0 | 46.3 s |
+| `test_metrics.py` | 12 | 12 | 0 | 0 | 0 | 0.0 s |
+| `test_report.py` | 12 | 12 | 0 | 0 | 0 | 7.0 s |
+| `test_report_figures.py` | 25 | 25 | 0 | 0 | 0 | 31.0 s |
+| `test_report_tables.py` | 27 | 27 | 0 | 0 | 0 | 0.2 s |
+| `test_results.py` | 19 | 19 | 0 | 0 | 0 | 280.9 s |
+| `test_rul_degradation.py` | 17 | 17 | 0 | 0 | 0 | 9.4 s |
+| `test_rul_lstm.py` | 11 | 11 | 0 | 0 | 0 | 198.7 s |
 
 ## Couverture du code Python
 
