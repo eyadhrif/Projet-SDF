@@ -24,6 +24,8 @@ const ICI = path.dirname(fileURLToPath(import.meta.url))
 const P = (...a) => path.join(ICI, ...a)
 const ARGS = new Set(process.argv.slice(2))
 const PDF_NOM = 'Rapport_V1_FMDS_Eya_Salma.pdf'
+// --sortie=<fichier.pdf> : écrire le PDF ailleurs (utilisé par les tests, pour ne pas toucher au PDF livré)
+const SORTIE = (process.argv.find((a) => a.startsWith('--sortie=')) || '').slice(9) || P(PDF_NOM)
 const erreurs = []
 const err = (m) => erreurs.push(m)
 const lire = (f) => fs.readFileSync(f, 'utf-8')
@@ -246,16 +248,16 @@ async function main() {
   const imgKo = await page.evaluate(() => [...document.images].filter((i) => !i.complete || i.naturalWidth === 0).map((i) => i.src))
   if (imgKo.length || pageErr.length) { console.error('ÉCHEC : images non chargées ou erreurs', imgKo, pageErr); process.exit(1) }
   await page.pdf({
-    path: P(PDF_NOM), format: 'A4', printBackground: true, preferCSSPageSize: true, displayHeaderFooter: true,
+    path: SORTIE, format: 'A4', printBackground: true, preferCSSPageSize: true, displayHeaderFooter: true,
     headerTemplate: '<div style="font-size:7.5pt;color:#777;width:100%;padding:0 20mm 0 22mm;font-family:Calibri,Arial;text-align:right">FMDS et maintenance prédictive — C-MAPSS FD001 · Version 1</div>',
     footerTemplate: '<div style="font-size:8pt;color:#777;width:100%;text-align:center;font-family:Calibri,Arial"><span class="pageNumber"></span> / <span class="totalPages"></span></div>',
   })
   await b.close()
-  const pdf = fs.readFileSync(P(PDF_NOM), 'latin1')
+  const pdf = fs.readFileSync(SORTIE, 'latin1')
   const pages = (pdf.match(/\/Type\s*\/Page[^s]/g) || []).length
   verif.pages = pages
   fs.writeFileSync(P('build', 'verification.json'), JSON.stringify(verif, null, 1))
-  console.log(`  -> ${PDF_NOM} (${pages} pages)`)
+  console.log(`  -> ${path.relative(ICI, SORTIE)} (${pages} pages)`)
 }
 
 main().catch((e) => { console.error(e); process.exit(1) })

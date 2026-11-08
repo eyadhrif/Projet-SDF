@@ -141,10 +141,16 @@ def test_construction_verification():
 
 @avec_node
 @pytest.mark.slow
-def test_construction_du_pdf():
-    p = subprocess.run([NODE, "build.mjs"], cwd=REPORT, capture_output=True, text=True, encoding="utf-8", timeout=900)
+def test_construction_du_pdf(tmp_path):
+    pdf = tmp_path / "rapport.pdf"                       # le PDF livré n'est pas réécrit
+    p = subprocess.run([NODE, "build.mjs", f"--sortie={pdf}"], cwd=REPORT, capture_output=True, text=True,
+                       encoding="utf-8", timeout=900)
     assert p.returncode == 0, p.stdout + p.stderr
-    pdf = REPORT / "Rapport_V1_FMDS_Eya_Salma.pdf"
     assert pdf.read_bytes()[:5] == b"%PDF-"
     v = json.loads((REPORT / "build" / "verification.json").read_text(encoding="utf-8"))
     assert v["pages"] >= 30
+
+
+def test_pdf_livre_present():
+    pdf = REPORT / "Rapport_V1_FMDS_Eya_Salma.pdf"
+    assert pdf.read_bytes()[:5] == b"%PDF-" and pdf.stat().st_size > 1_000_000
