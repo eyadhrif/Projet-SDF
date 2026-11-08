@@ -1,0 +1,109 @@
+% Rapport du projet SdF — version LaTeX générée par report/build.mjs --latex (ne pas modifier à la main :
+% modifier report/source/*.md puis régénérer). Compiler de préférence avec XeLaTeX (latexmk lit .latexmkrc) ;
+% pdfLaTeX (défaut d'Overleaf) fonctionne aussi : le résumé arabe est alors inclus en image.
+\documentclass[12pt,a4paper,oneside]{report}
+
+% ---------- polices et langues ----------
+\usepackage{iftex}
+\usepackage{amsmath}
+\ifXeTeX
+  \usepackage{mathptmx}
+  \usepackage{fontspec}
+  % Times New Roman si elle est installée, sinon son clone libre TeX Gyre Termes, désigné par ses fichiers
+  % (trouvés par TeX Live partout, Overleaf compris, même quand la police n'est pas déclarée au système)
+  \IfFontExistsTF{Times New Roman}{\setmainfont{Times New Roman}}
+    {\IfFontExistsTF{TeX Gyre Termes}{\setmainfont{TeX Gyre Termes}}
+      {\setmainfont{texgyretermes}[Extension=.otf,UprightFont=*-regular,BoldFont=*-bold,ItalicFont=*-italic,BoldItalicFont=*-bolditalic]}}
+  \setmonofont{lmmono10-regular}[Extension=.otf,Scale=0.95]
+  \usepackage[bidi=default,english,french]{babel}
+  \babelprovide[import]{arabic}
+  \babelfont[arabic]{rm}[Scale=1.15]{Amiri}
+  \newcommand{\arabicabstract}{\begin{otherlanguage}{arabic}\input{chapters/resume_arabe}\end{otherlanguage}}
+\else
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{mathptmx}
+  \usepackage[scaled=0.92]{helvet}
+  \usepackage{lmodern}\renewcommand{\rmdefault}{ptm}\renewcommand{\ttdefault}{lmtt}
+  \usepackage[english,french]{babel}
+  \newcommand{\arabicabstract}{\noindent\includegraphics[width=\linewidth]{figures/resume_arabe.pdf}}
+\fi
+
+% ---------- mise en page ----------
+\usepackage[a4paper,top=2.6cm,bottom=2.6cm,left=2.5cm,right=2.5cm,headheight=15pt]{geometry}
+\usepackage{setspace}\setstretch{1.3}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+\usepackage{xcolor}
+\definecolor{navy}{RGB}{20,30,110}
+\definecolor{linkblue}{RGB}{28,84,140}
+\definecolor{headgray}{RGB}{90,90,90}
+\definecolor{boxgray}{RGB}{244,244,244}
+
+\usepackage{titlesec}
+\titleformat{\chapter}[display]{\normalfont\bfseries\fontsize{26}{30}\selectfont}
+  {\chaptertitlename\ \thechapter}{14pt}{\fontsize{24}{28}\selectfont}
+\titlespacing*{\chapter}{0pt}{20pt}{24pt}
+\titleformat{name=\chapter,numberless}[display]{\normalfont\bfseries\fontsize{26}{30}\selectfont}{}{0pt}{}
+\titlespacing*{name=\chapter,numberless}{0pt}{20pt}{24pt}
+\titleformat{\section}{\normalfont\Large\bfseries\color{headgray}}{\thesection}{0.8em}{}
+\titleformat{\subsection}{\normalfont\large\bfseries\color{headgray}}{\thesubsection}{0.8em}{}
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\small\color{headgray}FMDS et maintenance prédictive}
+\fancyhead[R]{\small\color{headgray}\nouppercase{\leftmark}}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.5pt}
+\renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter.\ #1}{}}
+\fancypagestyle{plain}{\fancyhf{}\fancyfoot[C]{\thepage}\renewcommand{\headrulewidth}{0pt}}
+\newcommand{\frontmark}[1]{\markboth{#1}{#1}}
+
+% ---------- contenu ----------
+\usepackage{graphicx}
+\usepackage{booktabs,tabularx,array}
+\usepackage{adjustbox}
+\usepackage{amssymb}
+\usepackage{enumitem}\setlist{itemsep=2pt,topsep=4pt}
+\usepackage{caption}\captionsetup{font=small}
+\usepackage{float}
+\usepackage{multicol}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks,colorlinks=true,linkcolor=linkblue,citecolor=teal,urlcolor=linkblue]{hyperref}
+
+\newcommand{\codeus}{\textunderscore\allowbreak}
+\newcommand{\code}[1]{{\ttfamily\let\_\codeus #1}}
+\newtcolorbox{problembox}{colback=boxgray,colframe=boxgray,boxrule=0pt,arc=0pt,
+  left=10pt,right=10pt,top=8pt,bottom=8pt,fontupper=\itshape,halign=center}
+
+% Introduction / Conclusion non numérotées dans chaque chapitre
+\newcommand{\chapintro}{\section*{Introduction}}
+\newcommand{\chapconclusion}{\section*{Conclusion}}
+
+\addto\captionsfrench{\renewcommand{\listfigurename}{Liste des figures}\renewcommand{\listtablename}{Liste des tableaux}%
+  \renewcommand{\contentsname}{Table des matières}\renewcommand{\bibname}{Bibliographie}}
+
+\setcounter{tocdepth}{1}
+
+\begin{document}
+\input{chapters/00_titre}
+
+\pagenumbering{arabic}
+\input{chapters/01_front}
+\input{chapters/02_listes}
+\clearpage
+\setcounter{page}{1}
+\input{chapters/03_introduction_generale}
+\input{chapters/04_cadre}
+\input{chapters/05_donnees}
+\input{chapters/06_methodologie}
+\input{chapters/07_architecture}
+\input{chapters/08_validation}
+\input{chapters/09_discussion}
+\input{chapters/10_perspectives}
+\input{chapters/11_conclusion_generale}
+\input{chapters/12_bibliographie}
+\input{chapters/13_glossaire}
+\input{chapters/14_annexes}
+\input{chapters/15_resumes}
+\end{document}

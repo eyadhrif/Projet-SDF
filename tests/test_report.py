@@ -105,12 +105,12 @@ PASSE = [r"\bnous avons\b", r"\b(?:a|ont|avait|avaient) été\b", r"\b(?:a|ont) 
 
 
 def test_perspectives_jamais_au_passe():
-    md = (SOURCE / "09_perspectives.md").read_text(encoding="utf-8")
+    md = (SOURCE / "10_perspectives.md").read_text(encoding="utf-8")
     assert "Aucun d'entre eux n'est réalisé à ce stade" in md
     fautes = [m.group(0) for p in PASSE for m in re.finditer(p, md, flags=re.I)]
     assert not fautes, fautes
-    # chaque perspective suit le format en huit points
-    blocs = re.split(r"^## ", md, flags=re.M)[1:]
+    # chaque perspective suit le format en huit points (hors Introduction et Conclusion du chapitre)
+    blocs = [b for b in re.split(r"^## ", md, flags=re.M)[1:] if not b.startswith(("Introduction", "Conclusion"))]
     assert len(blocs) >= 12
     for b in blocs:
         points = re.findall(r"^- \*\*([^*]+?) :\*\*", b, flags=re.M)

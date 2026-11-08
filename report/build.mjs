@@ -16,6 +16,7 @@
 // jamais cités ; formule invalide) arrête la construction avec un code de sortie 1.
 import { marked } from 'marked'
 import katex from 'katex'
+import { ieee } from './ieee.mjs'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
@@ -24,6 +25,7 @@ const ICI = path.dirname(fileURLToPath(import.meta.url))
 const P = (...a) => path.join(ICI, ...a)
 const ARGS = new Set(process.argv.slice(2))
 const PDF_NOM = 'Rapport_V1_FMDS_Eya_Salma.pdf'
+const META_ENTETE = JSON.parse(fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), 'metadonnees.json'), 'utf-8')).entete
 // --sortie=<fichier.pdf> : écrire le PDF ailleurs (utilisé par les tests, pour ne pas toucher au PDF livré)
 const SORTIE = (process.argv.find((a) => a.startsWith('--sortie=')) || '').slice(9) || P(PDF_NOM)
 const erreurs = []
@@ -46,6 +48,26 @@ async function captures() {
   await b.close()
 }
 
+// page de garde (métadonnées : metadonnees.json ; logos : logos/), sur le modèle du rapport de référence
+function pageDeGardeHtml(M) {
+  const logo = (f, h) => `<img src="../logos/${f}" style="height:${h}">`
+  return `<div class="page-titre">
+<div class="logos"><div>${logo('logo_univ_tunis.png', '21mm')}</div><div>${logo('logo_emblem.png', '22mm')}</div><div>${logo('logo_ensit.png', '15mm')}</div></div>
+<div class="filet"></div>
+<div class="inst"><b>${M.universite}</b><br><b>${M.ecole}</b><br><span>${M.departement}</span></div>
+<div class="filet"></div>
+<div class="type">${M.type}</div><div class="formation">${M.formation}</div>
+<div class="par">${M.presente_par}</div><div class="auteurs">${M.auteurs.join('<br>')}</div>
+<div class="filet fin"></div><div class="titre">${M.titre}</div><div class="sous-titre">${M.sous_titre}</div><div class="filet fin"></div>
+<div class="version">${M.version}</div>
+<div class="encadrant"><b>Encadré par :</b> ${M.encadrant}</div>
+<div class="annee"><b>Année universitaire :</b> ${M.annee}</div>
+</div>`
+}
+
+const SANS_TOC = new Set(['Introduction', 'Conclusion', 'Résumé', 'Abstract', 'ملخص', 'Table des matières',
+  'Liste des figures', 'Liste des tableaux'])
+
 // ------------------------------------------------------------------ assemblage du document
 function construire() {
   const V = JSON.parse(lire(P('generated', 'valeurs.json')))
@@ -63,6 +85,8 @@ function construire() {
     if (!(k in V)) { err(`valeur inconnue {{${k}}}`); return `??${k}??` }
     utilisees.add(k); return V[k]
   })
+  const META = JSON.parse(lire(P('metadonnees.json')))
+  md = md.replace(/^!page-de-garde[ \t]*$/m, () => pageDeGardeHtml(META))
 
   // 2. formules : mises de côté (marked ne doit pas toucher au TeX)
   const maths = []
@@ -157,14 +181,21 @@ function construire() {
 
   // 7. listes générées
   const lien = (id, t) => `<a href="#${id}">${t}</a>`
-  md = md.replace(/^!table-des-matieres[ \t]*$/m, () => '<nav class="toc">' + toc.filter((t) => t.niv <= 2).map((t) =>
+  // profondeur 1 comme le modèle : chapitres et sections ; ni « Introduction / Conclusion » de chapitre, ni les listes
+  const dansToc = (t) => t.niv === 1 ? !SANS_TOC.has(t.titre) : t.niv === 2 && !(!t.num && SANS_TOC.has(t.titre))
+  md = md.replace(/^!table-des-matieres[ \t]*$/m, () => '<nav class="toc">' + toc.filter(dansToc).map((t) =>
     `<div class="toc${t.niv}">${lien(t.id, `${t.num ? `<span class="num">${t.num}</span> ` : ''}${marked.parseInline(t.titre)}`)}</div>`).join('\n') + '</nav>')
   md = md.replace(/^!liste-des-figures[ \t]*$/m, () => '<div class="liste">' + figs.map((f, i) =>
     `<div>${lien(f.id, `Figure ${i + 1}`)} – ${marked.parseInline(f.leg)}</div>`).join('\n') + '</div>')
   md = md.replace(/^!liste-des-tableaux[ \t]*$/m, () => '<div class="liste">' + tabs.map((t, i) =>
     `<div>${lien(t.id, `Tableau ${i + 1}`)} – ${marked.parseInline(t.titre)}</div>`).join('\n') + '</div>')
   md = md.replace(/^!bibliographie[ \t]*$/m, () => '<ol class="biblio">' + ordre.map((c) =>
-    `<li id="ref-${c}">${marked.parseInline(bibCles.get(c).texte)}</li>`).join('\n') + '</ol>')
+    `<li id="ref-${c}">${marked.parseInline(ieee(bibCles.get(c)))}</li>`).join('\n') + '</ol>')
+
+  // 7 bis. blocs « :::nom … ::: » (dédicace, encadré, glossaire, résumés, texte arabe de droite à gauche)
+  md = md.replace(/^:::(\w+)[ \t]*\n([\s\S]*?)\n:::[ \t]*$/gm, (_, nom, corps) =>
+    `<div class="${nom}"${nom === 'arabe' ? ' dir="rtl" lang="ar"' : ''}>\n\n${corps}\n\n</div>`)
+  if (/^:::/m.test(md)) err('bloc « ::: » non fermé')
 
   // 8. Markdown -> HTML, puis formules
   fs.mkdirSync(P('build'), { recursive: true })
@@ -180,47 +211,89 @@ function construire() {
 }
 
 const CSS = `
-@page { size: A4; margin: 22mm 20mm 22mm 22mm; }
-:root { --encre: #111; --gris: #555; --bleu: #1f4e8c; --filet: #c9c9c9; }
-html { font-family: Cambria, "Times New Roman", Georgia, serif; font-size: 10.5pt; color: var(--encre); background: #fff; }
-body { margin: 0; line-height: 1.42; text-align: justify; hyphens: auto; }
-h1, h2, h3 { font-family: Calibri, "Segoe UI", Arial, sans-serif; color: var(--bleu); text-align: left; break-after: avoid; }
-h1.chapitre { font-size: 19pt; margin: 0 0 14pt; padding-bottom: 6pt; border-bottom: 1.5pt solid var(--bleu); break-before: page; }
-h2 { font-size: 13pt; margin: 16pt 0 6pt; } h3 { font-size: 11pt; margin: 12pt 0 4pt; }
-.num { color: var(--gris); font-weight: 600; margin-right: 4pt; }
-p { margin: 0 0 7pt; orphans: 3; widows: 3; }
-a { color: var(--bleu); text-decoration: none; }
+@page { size: A4; margin: 26mm 25mm 26mm 25mm; }
+:root { --encre: #000; --gris: #5a5a5a; --navy: #141e6e; --lien: #1c548c; --boite: #f4f4f4; }
+html { font-family: "Times New Roman", "TeX Gyre Termes", Times, serif; font-size: 12pt; color: var(--encre); background: #fff; }
+body { margin: 0; line-height: 1.45; text-align: justify; hyphens: auto; }
+h1, h2, h3 { font-family: inherit; text-align: left; break-after: avoid; }
+h1 { font-size: 26pt; font-weight: 700; margin: 30mm 0 12mm; break-before: page; }
+h1 .num { display: block; font-size: 24pt; margin-bottom: 6mm; color: var(--encre); }
+h1 .num::before { content: "Chapitre "; }
+h2 { font-size: 16pt; color: var(--gris); margin: 16pt 0 7pt; }
+h3 { font-size: 13pt; color: var(--gris); margin: 12pt 0 5pt; }
+h2 .num, h3 .num { margin-right: 8pt; }
+p { margin: 0 0 6pt; orphans: 3; widows: 3; }
+a { color: var(--lien); text-decoration: none; }
 figure { margin: 10pt 0 12pt; text-align: center; break-inside: avoid; }
 figure img { max-width: 100%; }
-figcaption, .legende { font-size: 9pt; color: var(--gris); margin-top: 4pt; text-align: center; }
-.legende { margin: 0 0 4pt; }
+figcaption, .legende { font-size: 10.5pt; margin-top: 4pt; text-align: center; }
 .tableau { margin: 10pt 0 12pt; break-inside: avoid; }
-table { border-collapse: collapse; margin: 0 auto; font-size: 8.8pt; font-family: Calibri, "Segoe UI", Arial, sans-serif; }
-th { border-top: 1.2pt solid var(--encre); border-bottom: 0.6pt solid var(--encre); padding: 3pt 7pt; font-weight: 600; }
-td { padding: 2.2pt 7pt; border-bottom: 0.3pt solid #e3e3e3; }
+.tableau .legende { margin: 0 0 5pt; }
+table { border-collapse: collapse; margin: 0 auto; font-size: 10pt; line-height: 1.3; }
+th { border-top: 1.2pt solid var(--encre); border-bottom: 0.6pt solid var(--encre); padding: 3pt 7pt; font-weight: 700; }
+td { padding: 2.5pt 7pt; }
 tbody tr:last-child td { border-bottom: 1.2pt solid var(--encre); }
 .equation { display: flex; align-items: center; justify-content: center; position: relative; margin: 6pt 0; break-inside: avoid; }
-.equation .eqn { position: absolute; right: 0; color: var(--gris); }
+.equation .eqn { position: absolute; right: 0; }
 .katex { font-size: 1.05em; }
-ul, ol { margin: 0 0 7pt; padding-left: 18pt; } li { margin-bottom: 2pt; }
-blockquote { margin: 8pt 0; padding: 6pt 10pt; border-left: 3pt solid var(--bleu); background: #f3f6fa; break-inside: avoid; }
+ul, ol { margin: 0 0 6pt; padding-left: 20pt; } li { margin-bottom: 2pt; }
+blockquote { margin: 8pt 0; padding: 7pt 11pt; background: var(--boite); break-inside: avoid; }
 blockquote p:last-child { margin-bottom: 0; }
-code { font-family: Consolas, monospace; font-size: 8.8pt; background: #f2f2f2; padding: 0 2pt; }
-pre { background: #f6f6f6; padding: 6pt 8pt; font-size: 8.3pt; line-height: 1.3; white-space: pre-wrap; break-inside: avoid; text-align: left; }
-pre code { background: none; padding: 0; }
-.toc div, .liste div { margin: 2pt 0; text-align: left; } .toc1 { font-weight: 600; margin-top: 6pt !important; } .toc2 { padding-left: 16pt; }
-.biblio li { margin-bottom: 4pt; text-align: left; font-size: 9.5pt; }
-.page-titre { height: 245mm; display: flex; flex-direction: column; justify-content: space-between; text-align: center; }
-.page-titre .haut { font-family: Calibri, Arial, sans-serif; font-size: 11pt; color: var(--gris); line-height: 1.5; }
-.page-titre h1.titre { font-family: Calibri, Arial, sans-serif; font-size: 24pt; color: var(--bleu); border: none; margin: 0 0 10pt; }
-.page-titre .sous-titre { font-size: 13pt; color: var(--gris); }
-.page-titre .auteurs { font-size: 12pt; line-height: 1.7; }
+code { font-family: "Latin Modern Mono", Consolas, monospace; font-size: 10pt; }
+pre { background: #f6f6f6; padding: 6pt 8pt; font-size: 8.8pt; line-height: 1.3; white-space: pre-wrap; break-inside: avoid; text-align: left; }
+.toc div, .liste div { margin: 3pt 0; text-align: left; } .toc1 { font-weight: 700; margin-top: 9pt !important; } .toc2 { padding-left: 18pt; }
+.toc .num { margin-right: 10pt; }
+.biblio { columns: 2; column-gap: 9mm; font-size: 10.5pt; line-height: 1.3; padding-left: 22pt; }
+.biblio li { margin-bottom: 4pt; text-align: left; break-inside: avoid; }
+/* page de garde, sur le modèle du rapport de référence */
+.page-titre { height: 240mm; display: flex; flex-direction: column; align-items: center; text-align: center; line-height: 1.25; }
+.page-titre .logos { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+.page-titre .logos div { width: 33%; } .page-titre .logos div:first-child { text-align: left; } .page-titre .logos div:last-child { text-align: right; }
+.page-titre .filet { width: 100%; border-top: 1pt solid var(--navy); margin: 5mm 0; }
+.page-titre .filet.fin { width: 85%; border-top: 0.6pt solid var(--encre); margin: 4mm 0; }
+.page-titre .inst { font-size: 13pt; line-height: 1.5; } .page-titre .inst span { font-size: 11.5pt; font-weight: 700; }
+.page-titre .type { font-size: 19pt; font-weight: 700; margin-top: 6mm; } .page-titre .formation { font-size: 12.5pt; font-weight: 700; margin-top: 2mm; }
+.page-titre .par { margin-top: 7mm; } .page-titre .auteurs { font-size: 19pt; font-weight: 700; margin: 3mm 0 4mm; line-height: 1.3; }
+.page-titre .titre { font-size: 23pt; font-weight: 700; color: var(--navy); } .page-titre .sous-titre { font-size: 15pt; font-weight: 700; margin-top: 2mm; }
+.page-titre .version { margin-top: 6mm; } .page-titre .encadrant { margin-top: 8mm; } .page-titre .annee { margin-top: auto; }
+.dedicace { margin-top: 25mm; text-align: center; font-style: italic; line-height: 1.6; }
+.dedicace p { margin-bottom: 14pt; text-align: center; white-space: pre-line; }
+.encadre { background: var(--boite); padding: 9pt 14pt; margin: 10pt 8%; font-style: italic; text-align: center; }
+.encadre p { margin: 0; text-align: center; }
+.glossaire { font-size: 11pt; line-height: 1.35; } .glossaire p { margin-bottom: 4pt; text-align: left; }
+.resumes h2, .arabe h2 { color: var(--encre); font-size: 13pt; margin: 8pt 0 4pt; }
+.resumes, .arabe { font-size: 11pt; line-height: 1.35; }
+.resumes h2:nth-of-type(2) { border-top: 0.6pt solid var(--encre); padding-top: 8pt; margin-top: 12pt; }
+.arabe { border-top: 0.6pt solid var(--encre); padding-top: 6pt; margin-top: 12pt; font-family: "Amiri", "Traditional Arabic", "Arial", serif; font-size: 13pt; text-align: justify; }
+.arabe h2 { text-align: right; }
 .saut { break-after: page; }
-.encadre { border: 0.8pt solid var(--filet); padding: 8pt 10pt; margin: 8pt 0; background: #fafafa; break-inside: avoid; }
 `
+
+// résumé arabe en PDF (image de repli du gabarit quand Overleaf compile avec pdfLaTeX), rendu par Chromium
+async function resumeArabePdf(sortie) {
+  const { html } = construire()
+  const bloc = html.match(/<div class="arabe"[\s\S]*?<\/div>/)
+  if (!bloc) throw new Error('bloc arabe introuvable')
+  const { chromium } = await import('@playwright/test')
+  const b = await chromium.launch()
+  const page = await b.newPage()
+  await page.setContent(`<!doctype html><html lang="ar"><meta charset="utf-8"><style>
+    body{margin:0;width:160mm;font-family:Amiri,"Traditional Arabic",Arial,serif;font-size:12.5pt;line-height:1.55;text-align:justify}
+    h2{font-size:14pt;margin:0 0 6pt;text-align:right}p{margin:0 0 6pt}</style><body>${bloc[0]}</body></html>`)
+  const h = await page.evaluate(() => Math.ceil(document.body.scrollHeight))
+  await page.pdf({ path: sortie, width: '160mm', height: `${h + 4}px`, printBackground: true, pageRanges: '1' })
+  await b.close()
+}
 
 async function main() {
   if (ARGS.has('--captures')) { await captures(); return }
+  if (ARGS.has('--latex')) {
+    const { genererLatex } = await import('./latex.mjs')
+    const r = genererLatex()
+    await resumeArabePdf(P('latex', 'figures', 'resume_arabe.pdf'))
+    console.log(`  -> latex/ (main.tex, ${r.chapitres} fichiers de chapitres, ${r.references} références IEEE, figures)`)
+    return
+  }
   const { html, stats } = construire()
   fs.mkdirSync(P('build'), { recursive: true })
   const katexCss = path.join(path.dirname(fileURLToPath(import.meta.resolve('katex'))), 'katex.min.css')
@@ -249,8 +322,8 @@ async function main() {
   if (imgKo.length || pageErr.length) { console.error('ÉCHEC : images non chargées ou erreurs', imgKo, pageErr); process.exit(1) }
   await page.pdf({
     path: SORTIE, format: 'A4', printBackground: true, preferCSSPageSize: true, displayHeaderFooter: true,
-    headerTemplate: '<div style="font-size:7.5pt;color:#777;width:100%;padding:0 20mm 0 22mm;font-family:Calibri,Arial;text-align:right">FMDS et maintenance prédictive — C-MAPSS FD001 · Version 1</div>',
-    footerTemplate: '<div style="font-size:8pt;color:#777;width:100%;text-align:center;font-family:Calibri,Arial"><span class="pageNumber"></span> / <span class="totalPages"></span></div>',
+    headerTemplate: `<div style="font-size:8.5pt;color:#5a5a5a;width:100%;margin:0 25mm;padding-bottom:2pt;border-bottom:0.5pt solid #5a5a5a;font-family:'Times New Roman',serif;display:flex;justify-content:space-between"><span>${META_ENTETE}</span><span>C-MAPSS FD001 · Version 1</span></div>`,
+    footerTemplate: `<div style="font-size:10pt;width:100%;text-align:center;font-family:'Times New Roman',serif"><span class="pageNumber"></span></div>`,
   })
   await b.close()
   const pdf = fs.readFileSync(SORTIE, 'latin1')

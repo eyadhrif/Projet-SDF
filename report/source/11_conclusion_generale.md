@@ -1,4 +1,4 @@
-# Conclusion {#sec:conclusion}
+# Conclusion générale {-}
 
 Cette première version de l'étude a appliqué l'ensemble de la démarche de sûreté de fonctionnement à une flotte de turboréacteurs simulés, des données brutes jusqu'à un outil d'aide à la décision.
 

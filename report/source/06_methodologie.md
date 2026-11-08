@@ -1,6 +1,10 @@
 # Méthodologie {#sec:methodologie}
 
-Ce chapitre présente, pour chaque méthode, ses fondements mathématiques, ses hypothèses et le choix de ses paramètres. Les valeurs numériques des paramètres sont lues directement dans le code ; elles sont regroupées au [@tab:hypotheses_parametres] (annexe). Chaque section indique le ticket du plan de sprints et la personne responsable.
+## Introduction {-}
+
+Ce chapitre présente les méthodes mises en œuvre, dans l'ordre du plan de sprints : l'estimation de la fiabilité, la maintenabilité et la disponibilité, la construction de l'indicateur de santé, la classification de l'état et les deux modèles d'estimation de la durée de vie résiduelle. Pour chacune sont donnés les fondements mathématiques, les hypothèses et le choix des paramètres.
+
+Les valeurs numériques des paramètres sont lues directement dans le code ; elles sont regroupées au [@tab:hypotheses_parametres] (annexe). Chaque section indique le ticket du plan de sprints et la personne responsable.
 
 ## Fiabilité (FMDS-01, Eya) {#sec:fiabilite}
 
@@ -162,3 +166,7 @@ car en début de vie la dégradation n'est pas observable et le RUL exact ne peu
 Le réseau [cite:hochreiter1997,zheng2017] comprend {{lstm_couches}} couches LSTM de {{lstm_unites}} unités avec un dropout de {{lstm_dropout}}, puis une petite couche dense ReLU et une sortie linéaire. L'apprentissage minimise l'erreur quadratique moyenne avec l'optimiseur Adam [cite:kingma2015] (pas initial {{lstm_lr}}, lots de {{lstm_lot}} fenêtres, écrêtage de la norme du gradient), et le pas est réduit en cas de plateau. {{lstm_val_moteurs}} moteurs d'entraînement tirés au hasard sont réservés à la validation. L'**arrêt précoce** interrompt l'apprentissage après {{lstm_patience}} époques sans amélioration de l'erreur de validation (au plus {{lstm_epoques_max}} époques), et les poids de la meilleure époque sont conservés. La prédiction pour un moteur de test est la sortie au dernier cycle observé, bornée à zéro. Le réseau est implémenté avec PyTorch [cite:paszke2019].
 
 **Reproductibilité.** L'entraînement du LSTM n'est pas exactement reproductible d'une machine à l'autre (calcul flottant sur processeur). Les résultats publiés correspondent au modèle sauvegardé, rechargé par défaut ; le réentraînement reste possible et sa variabilité est quantifiée au [@sec:reproductibilite].
+
+## Conclusion {-}
+
+Ce chapitre a détaillé les six méthodes de l'étude, leurs hypothèses, en particulier la censure non informative et les temps de réparation simulés, et leurs paramètres. Le chapitre suivant décrit le système logiciel qui les met en œuvre.

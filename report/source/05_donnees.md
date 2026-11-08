@@ -1,5 +1,9 @@
 # Données {#sec:donnees}
 
+## Introduction {-}
+
+Ce chapitre décrit le jeu de données C-MAPSS FD001 : son origine, sa structure et ses tailles exactes, le traitement des moteurs encore en service par la censure à droite, et l'analyse exploratoire des capteurs.
+
 ## Origine et protocole de simulation {#sec:donnees-origine}
 
 Les données proviennent du simulateur C-MAPSS (*Commercial Modular Aero-Propulsion System Simulation*) de la NASA [cite:saxena2008damage]. Chaque moteur démarre avec un niveau d'usure initial et une dispersion de fabrication inconnus, considérés comme normaux. Au cours des cycles de vol, une dégradation est injectée dans le compresseur haute pression (HPC) jusqu'à la défaillance, définie par le franchissement d'une marge de fonctionnement. Les mesures sont bruitées. Le sous-ensemble FD001 retenu ici est le plus simple : **une seule condition opératoire** (niveau de la mer) et **un seul mode de défaillance** (dégradation du HPC) [cite:saxena2008data].
@@ -31,3 +35,7 @@ Le [@tab:donnees_capteurs] donne les statistiques des {{n_capteurs}} capteurs et
 !tableau[donnees_capteurs]
 
 !figure[donnees_signaux_moteur1](Signaux bruts de capteurs retenus pour le premier moteur d'entraînement et leur moyenne glissante : la dérive progressive vers la défaillance est visible malgré le bruit.)
+
+## Conclusion {-}
+
+Les données forment une population de {{n_unites}} unités pour l'analyse de fiabilité, dont {{n_censures}} durées censurées à droite. Aucune défaillance n'intervient avant {{t_min_obs}} cycles, et {{n_constants}} capteurs constants sont écartés. Le chapitre suivant présente les méthodes appliquées à ces données.

@@ -1,5 +1,9 @@
 # Architecture et workflow du système {#sec:architecture}
 
+## Introduction {-}
+
+Ce chapitre décrit la mise en œuvre logicielle : le pipeline de calcul, l'API, le tableau de bord et les dispositifs qui garantissent la reproductibilité des résultats.
+
 ## Pipeline de calcul {#sec:pipeline}
 
 Le code Python est organisé en modules, un par ticket du plan de sprints (répartition en annexe, [@sec:annexe-repartition]). Le script `run_all.py` enchaîne toutes les étapes et exporte les résultats dans des fichiers JSON, qui sont l'unique source de vérité du tableau de bord, des figures, des tableaux et des chiffres de ce rapport :
@@ -54,3 +58,7 @@ Plusieurs dispositifs garantissent que chaque chiffre est reproductible et traç
 - **modèle LSTM de référence** : un réentraînement sur une autre machine a donné un RMSE légèrement différent, dans la tolérance fixée de plus ou moins un demi-cycle. Les résultats publiés correspondent donc au modèle sauvegardé, que `run_all.py` recharge par défaut ; toutes les autres étapes sont déterministes, et deux exécutions produisent des fichiers JSON identiques. Une installation propre sous Linux redonne les mêmes résultats ; seule une prédiction intermédiaire du LSTM y diffère d'une unité d'arrondi, sans effet sur aucune métrique ;
 - **traçabilité** : chaque exécution écrit la date, la durée, les versions des bibliothèques et les graines dans `run_info.json`. Les résultats de ce rapport ont été produits avec Python {{python}}, NumPy {{v_numpy}}, pandas {{v_pandas}}, scikit-learn {{v_sklearn}}, lifelines {{v_lifelines}} et PyTorch {{v_torch}} ;
 - **suite de tests automatiques** (pytest pour le calcul et l'API, Playwright pour le tableau de bord). Elle vérifie les méthodes sur des cas dont la réponse est connue, la non-régression de chaque chiffre, l'absence de fuite entre moteurs, la cohérence entre l'API, les fichiers et le tableau de bord, et la concordance de chaque nombre de ce rapport avec sa source.
+
+## Conclusion {-}
+
+Le système repose sur un principe simple : les résultats sont calculés une seule fois par le pipeline, puis servis tels quels à l'API, au tableau de bord et à ce rapport. Le chapitre suivant présente le protocole expérimental et les résultats.

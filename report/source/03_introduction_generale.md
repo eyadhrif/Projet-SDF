@@ -1,0 +1,13 @@
+# Introduction générale {-}
+
+La maintenance des turboréacteurs pèse lourdement sur le coût d'exploitation d'une flotte aérienne. Une défaillance en service immobilise l'appareil et peut mettre en jeu la sécurité ; un remplacement trop précoce gaspille une partie de la vie utile des composants. Entre ces deux écueils, l'exploitant doit connaître le comportement statistique de sa flotte, ses indices de fiabilité, de maintenabilité et de disponibilité, et, de plus en plus, estimer pour chaque moteur la durée de vie qui lui reste à partir des mesures de ses capteurs.
+
+Ce projet, réalisé en binôme dans le cadre du module « Sûreté de fonctionnement et maintenance », applique cette démarche au jeu de données public NASA C-MAPSS, sous-ensemble FD001, qui simule la dégradation jusqu'à la défaillance de turboréacteurs [cite:saxena2008data,saxena2008damage]. Il répond à la question suivante :
+
+:::encadre
+À partir des seules données de capteurs d'une flotte de turboréacteurs, comment quantifier la fiabilité de cette flotte, en déduire une politique de maintenance préventive, puis aller au-delà avec une maintenance prédictive moteur par moteur, en garantissant que chaque résultat est exact, reproductible et justifié ?
+:::
+
+L'étude suit deux axes complémentaires. Le premier estime les indices FMDS de la flotte, en tenant compte des moteurs encore en service, et en déduit une politique de remplacement préventif. Le second construit une chaîne de maintenance prédictive : indicateur de santé, détection de l'état critique et estimation de la durée de vie résiduelle par deux modèles de natures différentes, un modèle de dégradation bayésien interprétable et un réseau de neurones récurrent. Les résultats sont servis par une API et un tableau de bord web, et chaque chiffre du rapport est produit par le code et vérifié par une suite de tests automatiques.
+
+Le rapport comporte sept chapitres. Le [@sec:etat-art] pose le cadre du projet et présente un état de l'art ciblé. Le [@sec:donnees] décrit les données et le [@sec:methodologie] les méthodes, avec leurs fondements mathématiques et leurs hypothèses. Le [@sec:architecture] présente l'architecture et la mise en œuvre du système. Le [@sec:resultats] expose le protocole expérimental et les résultats, discutés au [@sec:discussion]. Le [@sec:perspectives] présente les perspectives, avant la conclusion générale.

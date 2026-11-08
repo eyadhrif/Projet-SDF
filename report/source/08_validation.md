@@ -1,6 +1,44 @@
-# Résultats {#sec:resultats}
+# Validation et résultats {#sec:resultats}
 
-Tous les chiffres de ce chapitre proviennent des fichiers de résultats produits par `run_all.py` ; les figures et les tableaux sont générés à partir de ces fichiers.
+## Introduction {-}
+
+Ce chapitre présente le protocole expérimental et les métriques, puis les résultats obtenus pour la fiabilité, la maintenabilité et la disponibilité, la détection de l'état critique et l'estimation de la durée de vie résiduelle, avant de comparer les méthodes. Tous les chiffres de ce chapitre proviennent des fichiers de résultats produits par `run_all.py` ; les figures et les tableaux sont générés à partir de ces fichiers.
+
+## Protocole expérimental et métriques {#sec:protocole}
+
+### Découpages des données et validation {#sec:decoupages}
+
+Le découpage officiel de FD001 est respecté : les modèles sont appris sur les {{n_moteurs_train}} moteurs d'entraînement et évalués sur les {{n_moteurs_test}} moteurs de test, jamais vus pendant l'apprentissage. Les choix propres à chaque partie sont les suivants :
+
+- **fiabilité** : population de {{n_unites}} unités, avec {{n_defaillances}} défaillances et {{n_censures}} censures à droite ([@sec:donnees-censure]) ; le RUL réel des moteurs de test n'est pas utilisé ;
+- **classification** : validation croisée par groupes de moteurs ({{k_plis}} plis) sur l'entraînement, puis évaluation sur **tous les cycles** des moteurs de test ;
+- **RUL** : évaluation au **dernier cycle observé** de chaque moteur de test, comme dans le challenge PHM [cite:saxena2008damage] ; le LSTM réserve {{lstm_val_moteurs}} moteurs d'entraînement à l'arrêt précoce.
+
+### Métriques {#sec:metriques}
+
+**Fiabilité.**
+
+Le test de Kolmogorov-Smirnov accepte une loi si sa *p*-valeur dépasse $\alpha = 5\,\%$. L'AIC compare les lois entre elles, et le coefficient $R^2$ mesure la linéarité du diagramme de Weibull ([@sec:fiabilite]).
+
+**Classification.**
+
+Avec $VP$, $FP$, $VN$ et $FN$ les vrais et faux positifs et négatifs (la classe positive étant l'état critique), on utilise :
+
+$$\text{précision} = \frac{VP}{VP + FP}, \qquad \text{rappel} = \frac{VP}{VP + FN}, \qquad F_1 = \frac{2\,\text{précision} \cdot \text{rappel}}{\text{précision} + \text{rappel}}. $$ {#eq:classif}
+
+En maintenance, le **rappel** est la métrique la plus importante, car une défaillance manquée coûte bien plus cher qu'une inspection inutile. L'aire sous la courbe ROC (AUC) [cite:hanley1982] mesure la capacité à classer un cycle critique au-dessus d'un cycle normal, indépendamment du seuil de décision.
+
+**Durée de vie résiduelle.**
+
+L'erreur d'un moteur est $e_i = \widehat{\mathrm{RUL}}_i - \mathrm{RUL}_i$ : une erreur **positive** est une prédiction **tardive**, la plus dangereuse puisqu'elle annonce plus de vie qu'il n'en reste. Sur les $N$ moteurs de test :
+
+$$\mathrm{RMSE} = \sqrt{\frac1N \sum_i e_i^2}, \qquad \mathrm{MAE} = \frac1N \sum_i |e_i|, \qquad \text{biais} = \frac1N \sum_i e_i . $$ {#eq:rmse}
+
+Le **score NASA** [cite:saxena2008damage] pénalise exponentiellement les erreurs, et davantage les prédictions tardives :
+
+$$S = \sum_i s_i, \qquad s_i = \begin{cases} e^{-e_i/13} - 1 & e_i < 0 \\ e^{e_i/10} - 1 & e_i \ge 0 \end{cases}. $$ {#eq:score}
+
+Pour le modèle de dégradation, la qualité de l'incertitude est mesurée par la **couverture empirique** : la proportion de moteurs dont le RUL réel tombe dans l'intervalle de prédiction. Un intervalle bien calibré de niveau nominal $q$ couvre le RUL réel dans une proportion proche de $q$ ; une couverture inférieure signale une incertitude sous-estimée. Trois niveaux sont évalués : P25–P75, P10–P90 et P05–P95.
 
 ## Fiabilité {#sec:res-fiabilite}
 
@@ -134,3 +172,7 @@ Les deux approches de RUL sont complémentaires :
 - le **modèle de dégradation** est moins précis et biaisé vers les prédictions tardives, mais chacune de ses étapes est interprétable (trajectoire de l'indicateur de santé, seuil, loi a priori de flotte), et il fournit une distribution du RUL, même mal calibrée à ce stade.
 
 Du côté de la fiabilité, l'approche non paramétrique (Kaplan-Meier, Nelson-Aalen) et l'approche paramétrique (Weibull 3P) concordent sur la forme du taux de défaillance et sur la médiane, ce qui renforce la confiance dans le modèle retenu.
+
+## Conclusion {-}
+
+La loi de Weibull 3P décrit la fiabilité de la flotte, avec un MTTF de {{mttf}} cycles. Le classifieur atteint une AUC de {{gb_auc}} sur le jeu de test. Pour la durée de vie résiduelle, le LSTM est le plus précis (RMSE de {{lstm_rmse}} cycles), tandis que le modèle de dégradation, moins précis ({{deg_rmse}} cycles), fournit des intervalles encore trop étroits. Le chapitre suivant discute ces résultats.

@@ -1,0 +1,100 @@
+% généré depuis source/14_annexes.md — ne pas modifier à la main
+\chapter*{Annexes}
+\addcontentsline{toc}{chapter}{Annexes}
+\frontmark{Annexes}
+
+\section*{Annexe A — Hypothèses et paramètres}
+
+\begin{table}[htbp]
+\centering\small
+\begin{adjustbox}{max width=\linewidth,center}
+\begin{tabular}{lll}
+\toprule
+Paramètre & Valeur & Module \\
+\midrule
+Conversion temps & 1 cycle \ensuremath{\approx} 2 h (1 vol) & fmds.py \\
+Temps de réparation simulés & log-normale, médiane 16 h, \ensuremath{\sigma} = 0,6, graine 42 & fmds.py \\
+Coûts relatifs & Cp = 1, Cc = 5 & fmds.py \\
+Capteur constant & moins de 10 valeurs distinctes & features.py \\
+Sélection des capteurs & |tendance| \ensuremath{\ge} 0,5 & features.py \\
+Fenêtre glissante (features, lissage du HI) & 10 cycles & features.py \\
+Cible du HI & 1 sur les 10 \% premiers cycles, 0 sur les 10 \% derniers & features.py \\
+Classe « critique » & RUL \ensuremath{\le} 30 cycles ; « surveillance » si P \ensuremath{\ge} 0,2 & health.py \\
+Modèle de dégradation & polynôme de degré 2, 1000 tirages, horizon 400 cycles & rul\_degradation.py \\
+LSTM & fenêtres de 30 cycles, cible plafonnée à 125, 2 couches de 64 & rul\_lstm.py \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\caption{Hypothèses et paramètres des méthodes}\label{tab:hypotheses_parametres}
+\end{table}
+
+\section*{Annexe B — Structure du dépôt}
+
+\begin{verbatim}
+data/raw/                      jeu C-MAPSS FD001 (train, test, RUL)
+backend/
+  pipeline/data.py             SET-02   chargement, RUL, table de durées de vie, description
+  pipeline/fmds.py             FMDS-01  fiabilité ; FMDS-02 maintenabilité, disponibilité, préventif
+  pipeline/features.py         PDM-01   capteurs, features, indicateur de santé
+  pipeline/health.py           PDM-02   classification normal / critique
+  pipeline/rul_degradation.py  RUL-01   modèle de dégradation bayésien
+  pipeline/rul_lstm.py         RUL-02   LSTM
+  run_all.py                   RUL-03   orchestration et export des résultats
+  report_figures.py            figures du rapport
+  report_tables.py             tableaux et valeurs du rapport
+  api/main.py                  WEB-01   API FastAPI
+  models/  results/            modèles sauvegardés et résultats JSON
+frontend/                      WEB-02   tableau de bord React (src/, dist/)
+dashboard_autonome.html        tableau de bord autonome (un seul fichier)
+report/                        rapport : source/, figures/, tables/, build.mjs
+tests/                         suite de tests pytest ; frontend/tests : Playwright
+\end{verbatim}
+
+\section*{Annexe C — Guide de lancement}
+
+\begin{verbatim}
+# tableau de bord (résultats déjà calculés)
+cd backend
+pip install -r requirements.txt
+python -m uvicorn api.main:app --port 8000        # http://localhost:8000
+
+# recalcul complet, figures, tableaux
+python run_all.py
+python report_figures.py
+python report_tables.py
+
+# rapport (Node.js)
+cd ../report
+npm install
+node build.mjs                                     # -> Rapport_V1_FMDS_Eya_Salma.pdf
+
+# tests
+cd ..
+run_tests.bat --slow
+\end{verbatim}
+
+La version autonome \code{dashboard\_autonome.html} s'ouvre directement dans un navigateur, sans installation.
+
+\section*{Annexe D — Répartition du travail}\phantomsection\label{sec:annexe-repartition}
+
+\begin{center}\small
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{lll}
+\toprule
+Ticket & Contenu & Responsable \\
+\midrule
+SET-02 & Chargement des données, RUL, table de durées de vie, description du jeu & Salma \\
+FMDS-01 & Fiabilité : Kaplan-Meier, Nelson-Aalen, Weibull, adéquation, indicateurs & Eya \\
+FMDS-02 & Maintenabilité, disponibilité, remplacement préventif & Salma \\
+PDM-01 & Sélection des capteurs, features, indicateur de santé & Salma \\
+PDM-02 & Classification normal / critique & Eya \\
+RUL-01 & Modèle de dégradation bayésien & Eya \\
+RUL-02 & Réseau LSTM & Salma \\
+RUL-03 & Orchestration, comparaison, export & Eya et Salma \\
+WEB-01 & API FastAPI & Eya \\
+WEB-02 & Tableau de bord React & Salma \\
+Rapport & Figures, tableaux, rédaction & Eya et Salma \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{center}

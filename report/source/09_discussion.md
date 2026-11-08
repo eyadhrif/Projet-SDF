@@ -1,5 +1,9 @@
 # Discussion {#sec:discussion}
 
+## Introduction {-}
+
+Ce chapitre interprète les résultats dans le contexte industriel, puis présente les limites actuelles de l'étude.
+
 ## Interprétation industrielle {#sec:interpretation}
 
 **Une flotte qui s'use.** Le paramètre de forme supérieur à un et le taux de défaillance croissant indiquent que les défaillances de FD001 sont des défaillances d'**usure**, ce qui est conforme au mécanisme simulé (dégradation progressive du compresseur haute pression). Dans ce cas, la maintenance préventive a un sens : remplacer un moteur âgé réduit réellement le risque, ce qui ne serait pas vrai avec un taux constant.
@@ -22,3 +26,7 @@ Les limites suivantes sont connues et assumées dans cette Version 1 :
 6. **Seuil de décision du classifieur.** Le rappel de test est faible au seuil par défaut, sur un jeu très déséquilibré. Le seuil devrait être choisi selon le coût relatif d'une défaillance manquée et d'une fausse alerte.
 7. **Plafond et reproductibilité du LSTM.** Le LSTM ne peut pas prédire au-delà de son plafond, et son réentraînement varie légèrement selon la machine ; les résultats publiés correspondent au modèle sauvegardé.
 8. **Évaluation sur un seul instant par moteur.** Le RUL n'est évalué qu'au dernier cycle observé de chaque moteur de test, comme dans le challenge PHM ; la qualité des prédictions au fil de la vie n'est illustrée que sur un exemple.
+
+## Conclusion {-}
+
+Les résultats confirment l'intérêt d'une approche qui combine une vision de flotte, avec les indices FMDS, et une décision moteur par moteur, avec le pronostic. Les limites identifiées, en particulier la calibration du modèle de dégradation et le caractère simulé des données, orientent les perspectives présentées au chapitre suivant.

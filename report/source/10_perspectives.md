@@ -1,5 +1,7 @@
 # Perspectives {#sec:perspectives}
 
+## Introduction {-}
+
 Ce chapitre présente les développements envisagés pour les Versions 2 et 3. **Aucun d'entre eux n'est réalisé à ce stade.** Pour chacun, les huit points suivants sont précisés : le développement envisagé, sa motivation, la limite actuelle qui le justifie, les données et ressources nécessaires, les méthodes envisageables, les expérimentations de validation, les bénéfices attendus et les difficultés prévisibles.
 
 ## Modèles de dégradation probabilistes plus avancés {#sec:p-degradation}
@@ -155,3 +157,7 @@ Ce chapitre présente les développements envisagés pour les Versions 2 et 3. *
 - **Validation :** retours des utilisateurs et indicateurs de maintenance avant et après le déploiement.
 - **Bénéfices attendus :** un outil réellement utilisé pour la maintenance.
 - **Difficultés :** la sécurité, la fiabilité du service et la conduite du changement.
+
+## Conclusion {-}
+
+Ces perspectives vont des plus directes, qui s'appuient sur les données actuelles, aux plus ambitieuses, qui demandent des données industrielles ou un déploiement réel. Les premières alimenteront la Version 2 du rapport, en fonction des remarques de l'encadrant.

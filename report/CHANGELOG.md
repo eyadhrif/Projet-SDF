@@ -2,7 +2,15 @@
 
 Chaque version a un tag git (`v1.0-rapport`, `v2.0-rapport`, `v3.0-rapport`). Le rapport de tests joint à chaque version est `tests/RAPPORT_TESTS.md`, à l'état du tag.
 
-## Version 1.0.2 (tag `v1.0.2-rapport`) — version à utiliser
+## Version 1.1 (tag `v1.1-rapport`) — version à utiliser
+
+Mise en forme sur le modèle de rapport fourni par Eya (rapport de stage Sentinel) et bibliographie IEEE demandée par l'encadrant. Aucun chiffre ni aucune méthode ne change.
+
+- **Structure** : page de garde aux trois logos (Université de Tunis, emblème, ENSIT), dédicaces, remerciements, table des matières, listes des figures et des tableaux, introduction générale avec la problématique encadrée, sept chapitres numérotés ouverts par une introduction et fermés par une conclusion (cadre et état de l'art, données, méthodologie, architecture, validation et résultats, discussion, perspectives), conclusion générale, bibliographie, glossaire, annexes, résumés en français, anglais et arabe.
+- **Bibliographie IEEE** : références structurées (`bibliographie.json`) et mises en forme IEEE (`ieee.mjs`), sur deux colonnes.
+- **Version LaTeX / Overleaf** (`node build.mjs --latex`, `Rapport_V1_Overleaf.zip`) : préambule du modèle (XeLaTeX, Times, arabe avec Amiri ; repli pdfLaTeX avec le résumé arabe en image), générée depuis les mêmes sources que le PDF, donc avec les mêmes chiffres. Compilée sans erreur, sans renvoi indéfini et sans glyphe manquant avec XeLaTeX et pdfLaTeX (TeX Live).
+
+## Version 1.0.2 (tag `v1.0.2-rapport`)
 
 - **Correctif :** le PDF du tag `v1.0.1-rapport` est **corrompu** (octets binaires réécrits comme du texte UTF-8 entre sa construction et le commit ; taille 4,7 Mo au lieu de 2,6 Mo, flux illisibles). Le PDF est reconstruit et validé ; son contenu est celui de la version 1.0.1.
 - Test renforcé (`tests/test_report.py`) : le PDF livré doit être un binaire intact (en-tête, fin de fichier, aucune trace de réécriture en texte) ; le test vérifie lui-même qu'il rejette un PDF ainsi abîmé.
