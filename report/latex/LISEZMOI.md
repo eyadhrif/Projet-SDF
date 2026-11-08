@@ -5,7 +5,7 @@ Pour modifier le texte, modifier les sources Markdown puis régénérer : ne pas
 
 ## Overleaf
 
-1. *New Project* → *Upload Project* → choisir `Rapport_V1_Overleaf.zip`.
+1. *New Project* → *Upload Project* → choisir `Rapport_Overleaf.zip`.
 2. *Menu* → *Compiler* : **XeLaTeX** (recommandé : police Times New Roman et résumé arabe en texte).
    Avec pdfLaTeX (défaut d'Overleaf), le document compile aussi ; le résumé arabe est alors inclus en image.
 3. Fichier principal : `main.tex`.

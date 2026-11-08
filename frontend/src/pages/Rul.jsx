@@ -5,7 +5,7 @@ import {
 } from 'recharts'
 import { useData, Guard, Card, Kpi, Section, Param, fmt, tip, axis, C } from '../ui.jsx'
 
-const NAMES = { deg: 'Dégradation bayésienne (Eya)', lstm: 'LSTM (Salma)', ensemble: 'Moyenne des deux' }
+const NAMES = { deg: 'Dégradation bayésienne', lstm: 'LSTM', ensemble: 'Moyenne des deux' }
 
 function EngineRul({ unit, row, thr }) {
   const s = useData(`/engines/${unit}`)
@@ -65,8 +65,8 @@ export default function Rul({ engine, setEngine }) {
       <div className="head">
         <div><h1>Estimation de la durée de vie résiduelle (RUL)</h1>
           <p className="lede">Deux approches complémentaires, comparées sur les 100 moteurs de test NASA (RUL réel connu) :
-            un modèle de dégradation <b>interprétable et probabiliste</b> (Eya) et un réseau <b>LSTM</b> sur les séquences
-            de capteurs (Salma).</p></div>
+            un modèle de dégradation <b>interprétable et probabiliste</b> et un réseau <b>LSTM</b> sur les séquences
+            de capteurs.</p></div>
         <span className="tag">Score NASA : pénalise davantage les prédictions tardives</span>
       </div>
 
@@ -77,7 +77,7 @@ export default function Rul({ engine, setEngine }) {
         <Kpi label="Couverture IC 10–90 %" value={fmt(d.deg_info.coverage_10_90, 0)} unit="%" hint="RUL réel dans l'intervalle (dégr.)" />
       </div>
 
-      <Section owner="Eya + Salma">RUL-03 · Comparaison des modèles</Section>
+      <Section>Comparaison des modèles</Section>
       <div className="grid">
         <Card title="Métriques sur le jeu de test" span={5} sub="Erreur = RUL prédit − RUL réel (positive = prédiction tardive, donc dangereuse)">
           <table>
@@ -158,7 +158,6 @@ export default function Rul({ engine, setEngine }) {
             <Param l="Seuil HI" v={fmt(d.deg_info.threshold, 3)} /><Param l="σ seuil" v={fmt(d.deg_info.threshold_std, 3)} />
             <Param l="σ bruit" v={fmt(d.deg_info.sigma, 3)} /><Param l="Tirages" v="1000" />
           </div>
-          <span className="owner eya" style={{ display: 'inline-block', marginTop: 10 }}>Eya · RUL-01</span>
         </Card>
         <Card title="Apprentissage du LSTM" span={5} sub={`2 couches LSTM (64) + dense, fenêtres de ${d.lstm_info.seq} cycles, cible plafonnée à ${d.lstm_info.cap}, arrêt précoce`}>
           <ResponsiveContainer width="100%" height={190}>
@@ -172,7 +171,6 @@ export default function Rul({ engine, setEngine }) {
               <Line dataKey="val_rmse" stroke={C.ink} strokeDasharray="4 3" dot={false} name="RMSE validation" isAnimationActive={false} />
             </LineChart>
           </ResponsiveContainer>
-          <span className="owner salma">Salma · RUL-02</span>
         </Card>
         <Card title="Tableau de flotte" span={4} sub="Cliquez sur une ligne pour analyser le moteur"
           right={<select value={sortKey} onChange={(e) => setSort(e.target.value)}>

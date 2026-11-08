@@ -4,12 +4,12 @@
  "departement": "DÉPARTEMENT DE GÉNIE MATHÉMATIQUE",
  "type": "Projet de Sûreté de Fonctionnement et Maintenance",
  "formation": "Troisième année — Génie Mathématiques Appliquées et Modélisation (GMAM 3)",
- "presente_par": "Présenté par",
- "auteurs": ["Eya DHRIF", "Salma MOUEDDEB"],
+ "presente_par": "",
+ "auteurs": [],
  "titre": "Estimation des indices FMDS et maintenance prédictive",
  "sous_titre": "d'une flotte de turboréacteurs simulés (NASA C-MAPSS FD001)",
  "encadrant": "M. Fayçal Ben Hmida",
  "annee": "2026–2027",
- "version": "Rapport scientifique — Version 1",
+ "version": "Rapport de projet",
  "entete": "FMDS et maintenance prédictive"
 }

@@ -50,11 +50,11 @@ npm run build          # -> frontend/dist, servi par FastAPI
 npm run build:static   # -> frontend/dist-static/index.html (version autonome)
 ```
 
-### Rapport scientifique (Version 1)
+### Rapport de projet
 
-Le rapport est dans [`report/Rapport_V1_FMDS_Eya_Salma.pdf`](report/Rapport_V1_FMDS_Eya_Salma.pdf) (70 pages). Sa présentation suit le modèle de rapport de l'ENSIT (page de garde aux trois logos, dédicaces, remerciements, introduction générale, chapitres avec introduction et conclusion, glossaire, résumés en français, anglais et arabe) ; la bibliographie est au style IEEE, à la demande de l'encadrant.
+Le rapport est dans [`report/Rapport_FMDS_Eya_DHRIF_Salma_MOUEDDEB.pdf`](report/Rapport_FMDS_Eya_DHRIF_Salma_MOUEDDEB.pdf) (38 pages, compilé sur Overleaf). Sa présentation suit le modèle de rapport de l'ENSIT (page de garde aux trois logos, dédicaces, remerciements, liste des abréviations, introduction générale, quatre chapitres avec introduction et conclusion, conclusion générale, annexes, résumés en français, anglais et arabe) ; la bibliographie est au style IEEE, à la demande de l'encadrant.
 
-Une **version LaTeX pour Overleaf** est générée à partir des mêmes sources : [`report/Rapport_V1_Overleaf.zip`](report/Rapport_V1_Overleaf.zip) (Overleaf → *Upload Project*, compilateur XeLaTeX ; pdfLaTeX fonctionne aussi). Elle est compilée sans erreur par les tests (XeLaTeX et pdfLaTeX). Ses sources sont en Markdown avec formules LaTeX (`report/source/`), et **aucun chiffre n'y est tapé à la main** : le texte cite des valeurs générées depuis `backend/results/`.
+Une **version LaTeX pour Overleaf** est générée à partir des mêmes sources : [`report/Rapport_Overleaf.zip`](report/Rapport_Overleaf.zip) (Overleaf → *Upload Project*, compilateur XeLaTeX ; pdfLaTeX fonctionne aussi). Elle est compilée sans erreur par les tests (XeLaTeX et pdfLaTeX). Ses sources sont en Markdown avec formules LaTeX (`report/source/`), et **aucun chiffre n'y est tapé à la main** : le texte cite des valeurs générées depuis `backend/results/`.
 
 ```bash
 cd backend
@@ -62,9 +62,9 @@ python report_figures.py   # -> report/figures (21 figures, PNG 300 dpi + PDF)
 python report_tables.py    # -> report/tables (Markdown + LaTeX) et report/generated/valeurs.json
 cd ../report
 npm install
-node build.mjs             # -> Rapport_V1_FMDS_Eya_Salma.pdf (vérifications comprises)
+node build.mjs             # -> Rapport_FMDS_Maintenance_Predictive.pdf (aperçu HTML/Chromium, vérifications comprises)
 node build.mjs --latex     # -> report/latex/ (projet LaTeX)
-python zip_overleaf.py     # -> Rapport_V1_Overleaf.zip
+python zip_overleaf.py     # -> Rapport_Overleaf.zip
 ```
 
 ### Lancer les tests

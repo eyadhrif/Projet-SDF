@@ -167,14 +167,14 @@ def verifier_pdf_binaire(data):
 
 
 def test_pdf_livre_present_et_intact():
-    data = (REPORT / "Rapport_V1_FMDS_Eya_Salma.pdf").read_bytes()
+    data = (REPORT / "Rapport_FMDS_Eya_DHRIF_Salma_MOUEDDEB.pdf").read_bytes()
     assert len(data) > 1_000_000
     verifier_pdf_binaire(data)
 
 
 def test_verification_pdf_detecte_une_reecriture_en_texte():
     """Contrôle du test : un PDF décodé en texte puis réécrit en UTF-8 est bien rejeté."""
-    sain = (REPORT / "Rapport_V1_FMDS_Eya_Salma.pdf").read_bytes()
+    sain = (REPORT / "Rapport_FMDS_Eya_DHRIF_Salma_MOUEDDEB.pdf").read_bytes()
     abime = sain.decode("utf-8", errors="replace").encode("utf-8")
     with pytest.raises(AssertionError):
         verifier_pdf_binaire(abime)

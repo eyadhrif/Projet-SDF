@@ -31,7 +31,7 @@ export default function Fiabilite() {
         <Kpi label="Disponibilité A" value={fmt(di.A * 100, 2)} unit="%" hint="MUT / (MUT + MDT)" />
       </div>
 
-      <Section owner="Eya">FMDS-01 · Fiabilité</Section>
+      <Section>Fiabilité</Section>
       <div className="grid">
         <Card title="Fonction de fiabilité R(t)" span={8}
           sub="Kaplan-Meier avec IC 95 % (log-log) et marques de censure, comparé aux modèles paramétriques">
@@ -144,7 +144,7 @@ export default function Fiabilite() {
         </Card>
       </div>
 
-      <Section owner="Salma">FMDS-02 · Maintenabilité & disponibilité</Section>
+      <Section>Maintenabilité & disponibilité</Section>
       <div className="grid">
         <Card title="Maintenabilité M(t)" span={5}
           sub={`${ma.samples.length} temps de réparation, loi log-normale estimée par MV (médiane simulée ${as.ttr_median_h} h)`}>

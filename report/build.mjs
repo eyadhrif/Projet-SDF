@@ -1,5 +1,5 @@
-// Construction du rapport scientifique (Version 1)
-//   node build.mjs            -> build/rapport.html puis Rapport_V1_FMDS_Eya_Salma.pdf (Chromium)
+// Construction du rapport scientifique
+//   node build.mjs            -> build/rapport.html puis Rapport_FMDS_Maintenance_Predictive.pdf (Chromium)
 //   node build.mjs --check    -> vérifications seules (pas de PDF)
 //   node build.mjs --captures -> captures d'écran du dashboard autonome dans captures/
 //
@@ -24,7 +24,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 const ICI = path.dirname(fileURLToPath(import.meta.url))
 const P = (...a) => path.join(ICI, ...a)
 const ARGS = new Set(process.argv.slice(2))
-const PDF_NOM = 'Rapport_V1_FMDS_Eya_Salma.pdf'
+const PDF_NOM = 'build/apercu_html.pdf'   // aperçu rapide ; le rapport livré est la version LaTeX (latex/main.pdf)
 const META_ENTETE = JSON.parse(fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), 'metadonnees.json'), 'utf-8')).entete
 // --sortie=<fichier.pdf> : écrire le PDF ailleurs (utilisé par les tests, pour ne pas toucher au PDF livré)
 const SORTIE = (process.argv.find((a) => a.startsWith('--sortie=')) || '').slice(9) || P(PDF_NOM)
@@ -299,7 +299,7 @@ async function main() {
   const katexCss = path.join(path.dirname(fileURLToPath(import.meta.resolve('katex'))), 'katex.min.css')
   fs.cpSync(path.join(path.dirname(katexCss), 'fonts'), P('build', 'fonts'), { recursive: true })
   fs.copyFileSync(katexCss, P('build', 'katex.min.css'))
-  const doc = `<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Rapport V1 — FMDS et maintenance prédictive</title>
+  const doc = `<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Rapport de projet — FMDS et maintenance prédictive</title>
 <link rel="stylesheet" href="katex.min.css"><style>${CSS}</style></head><body>${html}</body></html>`
   fs.writeFileSync(P('build', 'rapport.html'), doc)
   const verif = { ...stats, erreurs }
@@ -322,7 +322,7 @@ async function main() {
   if (imgKo.length || pageErr.length) { console.error('ÉCHEC : images non chargées ou erreurs', imgKo, pageErr); process.exit(1) }
   await page.pdf({
     path: SORTIE, format: 'A4', printBackground: true, preferCSSPageSize: true, displayHeaderFooter: true,
-    headerTemplate: `<div style="font-size:8.5pt;color:#5a5a5a;width:100%;margin:0 25mm;padding-bottom:2pt;border-bottom:0.5pt solid #5a5a5a;font-family:'Times New Roman',serif;display:flex;justify-content:space-between"><span>${META_ENTETE}</span><span>C-MAPSS FD001 · Version 1</span></div>`,
+    headerTemplate: `<div style="font-size:8.5pt;color:#5a5a5a;width:100%;margin:0 25mm;padding-bottom:2pt;border-bottom:0.5pt solid #5a5a5a;font-family:'Times New Roman',serif;display:flex;justify-content:space-between"><span>${META_ENTETE}</span><span>C-MAPSS FD001</span></div>`,
     footerTemplate: `<div style="font-size:10pt;width:100%;text-align:center;font-family:'Times New Roman',serif"><span class="pageNumber"></span></div>`,
   })
   await b.close()

@@ -75,14 +75,14 @@ export default function Overview({ go }) {
         <Section>Démarche</Section>
         <div className="grid">
           {[
-            ['1 · Fiabilité', 'Kaplan-Meier avec IC 95 %, Nelson-Aalen, Weibull par MCO et par MV, tests KS et AIC, avec censure à droite des moteurs en service.', 'fiab', 'Eya'],
-            ['2 · Maintenabilité & disponibilité', 'Temps de réparation log-normaux, MTTR, disponibilité intrinsèque et A(t), âge optimal de remplacement préventif.', 'fiab', 'Salma'],
-            ['3 · Détection', `Sélection de ${he.selected.length} capteurs pronostiques, indicateur de santé, classification normal / critique (AUC ${fmt(he.classifiers[he.best].test.auc, 3)}).`, 'mon', 'Salma + Eya'],
-            ['4 · Pronostic RUL', `Modèle de dégradation bayésien (Eya) et LSTM (Salma) comparés sur les 100 moteurs de test NASA.`, 'rul', 'Eya + Salma'],
+            ['1 · Fiabilité', 'Kaplan-Meier avec IC 95 %, Nelson-Aalen, Weibull par MCO et par MV, tests KS et AIC, avec censure à droite des moteurs en service.', 'fiab', ''],
+            ['2 · Maintenabilité & disponibilité', 'Temps de réparation log-normaux, MTTR, disponibilité intrinsèque et A(t), âge optimal de remplacement préventif.', 'fiab', ''],
+            ['3 · Détection', `Sélection de ${he.selected.length} capteurs pronostiques, indicateur de santé, classification normal / critique (AUC ${fmt(he.classifiers[he.best].test.auc, 3)}).`, 'mon', ''],
+            ['4 · Pronostic RUL', `Modèle de dégradation bayésien et LSTM comparés sur les 100 moteurs de test NASA.`, 'rul', ''],
           ].map(([t, d, p, o]) => (
             <div key={t} className="card s3 click" style={{ cursor: 'pointer' }} onClick={() => go(p)}>
               <h3>{t}</h3><div className="cs" style={{ marginBottom: 8 }}>{d}</div>
-              {o.split('+').map((x) => <span key={x} className={`owner ${x.trim().toLowerCase()}`} style={{ marginRight: 6 }}>{x.trim()}</span>)}
+              {o && o.split('+').map((x) => <span key={x} className={`owner ${x.trim().toLowerCase()}`} style={{ marginRight: 6 }}>{x.trim()}</span>)}
             </div>))}
         </div>
       </>)

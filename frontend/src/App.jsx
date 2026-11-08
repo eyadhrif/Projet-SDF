@@ -33,7 +33,6 @@ export default function App() {
           </button>
         ))}
         <div className="foot">
-          <b>Eya DHRIF</b> & <b>Salma MOUEDDEB</b><br />
           Encadrant : M. Fayçal Ben Hmida<br />
           GMAM 3 · Novembre 2026
         </div>

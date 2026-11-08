@@ -11,3 +11,5 @@ frontend/tests/resultats/
 frontend/tests/captures/
 frontend/playwright-report/
 report/build/
+report/_to_delete/
+report/Rapport_FMDS_Maintenance_Predictive.pdf

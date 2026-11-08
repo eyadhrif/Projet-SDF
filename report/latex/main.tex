@@ -16,6 +16,7 @@
       {\setmainfont{texgyretermes}[Extension=.otf,UprightFont=*-regular,BoldFont=*-bold,ItalicFont=*-italic,BoldItalicFont=*-bolditalic]}}
   \setmonofont{lmmono10-regular}[Extension=.otf,Scale=0.95]
   \usepackage[bidi=default,english,french]{babel}
+  \frenchsetup{StandardLists=true,SmallCapsFigTabCaptions=false}
   \babelprovide[import]{arabic}
   \babelfont[arabic]{rm}[Scale=1.15]{Amiri}
   \newcommand{\arabicabstract}{\begin{otherlanguage}{arabic}\input{chapters/resume_arabe}\end{otherlanguage}}
@@ -26,6 +27,7 @@
   \usepackage[scaled=0.92]{helvet}
   \usepackage{lmodern}\renewcommand{\rmdefault}{ptm}\renewcommand{\ttdefault}{lmtt}
   \usepackage[english,french]{babel}
+  \frenchsetup{StandardLists=true,SmallCapsFigTabCaptions=false}
   \newcommand{\arabicabstract}{\noindent\includegraphics[width=\linewidth]{figures/resume_arabe.pdf}}
 \fi
 
@@ -64,8 +66,8 @@
 \usepackage{booktabs,tabularx,array}
 \usepackage{adjustbox}
 \usepackage{amssymb}
-\usepackage{enumitem}\setlist{itemsep=2pt,topsep=4pt}
-\usepackage{caption}\captionsetup{font=small}
+\usepackage{enumitem}\setlist{itemsep=2pt,topsep=4pt}\setlist[itemize]{label=\textbullet}
+\usepackage{caption}\captionsetup{labelsep=colon,font=normalsize,skip=8pt}
 \usepackage{float}
 \usepackage{multicol}
 \usepackage[most]{tcolorbox}
@@ -81,6 +83,7 @@
 \newcommand{\chapconclusion}{\section*{Conclusion}}
 
 \addto\captionsfrench{\renewcommand{\listfigurename}{Liste des figures}\renewcommand{\listtablename}{Liste des tableaux}%
+  \renewcommand{\tablename}{Tableau}%
   \renewcommand{\contentsname}{Table des matières}\renewcommand{\bibname}{Bibliographie}}
 
 \setcounter{tocdepth}{1}
@@ -94,16 +97,12 @@
 \clearpage
 \setcounter{page}{1}
 \input{chapters/03_introduction_generale}
-\input{chapters/04_cadre}
-\input{chapters/05_donnees}
-\input{chapters/06_methodologie}
-\input{chapters/07_architecture}
-\input{chapters/08_validation}
-\input{chapters/09_discussion}
-\input{chapters/10_perspectives}
-\input{chapters/11_conclusion_generale}
-\input{chapters/12_bibliographie}
-\input{chapters/13_glossaire}
-\input{chapters/14_annexes}
-\input{chapters/15_resumes}
+\input{chapters/04_cadre_donnees}
+\input{chapters/05_methodologie}
+\input{chapters/06_evaluation_visualisation}
+\input{chapters/07_discussion_perspectives}
+\input{chapters/08_conclusion_generale}
+\input{chapters/09_bibliographie}
+\input{chapters/10_annexes}
+\input{chapters/11_resumes}
 \end{document}

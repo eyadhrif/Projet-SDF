@@ -1,0 +1,106 @@
+% généré depuis source/05_methodologie.md — ne pas modifier à la main
+\chapter{Méthodologie}\label{sec:methodologie}
+
+\chapintro
+
+Ce chapitre présente les méthodes de l'étude : la fiabilité, la maintenabilité et la disponibilité, l'indicateur de santé, la classification de l'état et les deux modèles de RUL. Les valeurs des paramètres sont regroupées au tableau~\ref{tab:hypotheses_parametres} (annexe A).
+
+\section{Fiabilité}\label{sec:fiabilite}
+
+\subsection{Estimation non paramétrique}
+
+Soient $t_1 < t_2 < \dots$ les instants de défaillance, $d_i$ le nombre de défaillances en $t_i$ et $n_i$ le nombre d'unités encore à risque juste avant $t_i$. L'estimateur KM \cite{kaplanmeier1958} est
+
+\begin{equation}\label{eq:km}
+\hat R(t) = \prod_{t_i \le t} \left(1 - \frac{d_i}{n_i}\right).
+\end{equation}
+
+Une unité censurée sort de l'effectif à risque sans être comptée comme défaillance. L'IC à $95\,\%$ utilise la variance de Greenwood \cite{greenwood1926} sur l'échelle $\log(-\log \hat R)$. La censure est supposée non informative, ce que justifie le tirage indépendant des instants de troncature dans C-MAPSS \cite{saxena2008damage}. Le taux cumulé de Nelson-Aalen, lissé par un noyau d'Epanechnikov de 15 cycles, donne la forme de $\lambda(t)$ sans supposer de loi.
+
+\subsection{Lois paramétriques}
+
+La loi de Weibull à trois paramètres \cite{weibull1951} s'écrit
+
+\begin{equation}\label{eq:weibull3}
+R(t) = \exp\!\left[-\left(\frac{t-\gamma}{\eta}\right)^{\beta}\right] \text{ pour } t > \gamma, \qquad R(t) = 1 \text{ sinon},
+\end{equation}
+
+avec $\beta$ la forme, $\eta$ l'échelle et $\gamma$ la position, durée sans défaillance garantie ; la loi 2P correspond à $\gamma = 0$. Par \textbf{MCO}, la méthode graphique du cours \cite{benhmida}, les durées triées reçoivent les rangs de Bernard \cite{bernard1953} et la loi 2P se linéarise :
+
+\begin{equation}\label{eq:bernard}
+\hat F_i = \frac{i - 0{,}3}{n + 0{,}4}, \qquad \ln\!\big(-\ln(1-\hat F_i)\big) = \beta \ln t_i - \beta \ln \eta .
+\end{equation}
+
+Une courbure du diagramme signale un $\gamma$ non nul. Par \textbf{MV}, la log-vraisemblance $\ell = \sum_i [\delta_i \ln f(t_i) + (1-\delta_i) \ln R(t_i)]$ est maximisée. La loi 2P est ajustée avec censure sur les 200 unités (bibliothèque lifelines \cite{davidsonpilon2019}). Les quatre lois candidates, exponentielle, Weibull 2P, log-normale et Weibull 3P, sont comparées sur les 100 durées de défaillance complètes : \textbf{la Weibull 3P retenue est donc ajustée sans les censures}, limite discutée au section~\ref{sec:limites}. L'adéquation est jugée par le test KS au seuil de $5\,\%$, et les lois sont comparées par $\mathrm{AIC} = 2k - 2\ell$ ; un écart inférieur à deux unités les rend équivalentes.
+
+\subsection{Indicateurs dérivés}
+
+Pour la Weibull 3P, le MTTF et la durée $B_p$ valent
+
+\begin{equation}\label{eq:mttf}
+\mathrm{MTTF} = \gamma + \eta\, \Gamma\!\left(1 + \frac{1}{\beta}\right), \qquad B_p = \gamma + \eta \big(-\ln(1-p)\big)^{1/\beta}.
+\end{equation}
+
+\section{Maintenabilité, disponibilité et remplacement préventif}\label{sec:fmds02}
+
+C-MAPSS ne contient aucun temps de réparation : ils sont donc \textbf{simulés}, selon une loi log-normale de médiane 16 h et d'écart-type logarithmique 0,6, avec un cycle d'environ 2 h. Les résultats qui en dépendent illustrent la démarche du cours et ne décrivent pas une flotte réelle.
+
+La loi log-normale est ré-estimée par MV sur l'échantillon simulé, ce qui donne $\mathrm{MTTR} = e^{\mu + \sigma^2/2}$. La disponibilité intrinsèque d'un moteur réparé après chaque défaillance est
+
+\begin{equation}\label{eq:dispo}
+A_\infty = \frac{\mathrm{MUT}}{\mathrm{MUT} + \mathrm{MDT}}, \qquad \mathrm{MUT} = \mathrm{MTTF}, \quad \mathrm{MDT} = \mathrm{MTTR}.
+\end{equation}
+
+Selon la politique de Barlow et Proschan \cite{barlow1965}, un moteur est remplacé à l'âge $T$ pour un coût $C_p$, alors qu'une défaillance en service coûte $C_c > C_p$. Le coût moyen par cycle est
+
+\begin{equation}\label{eq:cout}
+C(T) = \frac{C_p\, R(T) + C_c\, \big(1 - R(T)\big)}{\displaystyle\int_0^T R(t)\, \mathrm{d}t}, \qquad C_\infty = \frac{C_c}{\mathrm{MTTF}} ,
+\end{equation}
+
+où $C_\infty$ est le coût de la maintenance corrective seule. L'âge optimal $T^*$ minimise $C(T)$. Les coûts relatifs $C_p = 1$ et $C_c = 5$ sont une hypothèse d'illustration.
+
+\section{Sélection des capteurs et indicateur de santé}\label{sec:hi}
+
+Pour chaque capteur non constant, deux scores inspirés de Coble et Hines \cite{coble2009} sont calculés : la \textbf{tendance} $\rho$, corrélation moyenne avec le numéro de cycle, et la \textbf{monotonie} de la série lissée,
+
+\begin{equation}\label{eq:monotonie}
+\mathrm{Mon} = \frac{|N^{+} - N^{-}|}{n-1},
+\end{equation}
+
+où $N^{+}$ et $N^{-}$ sont les nombres de variations positives et négatives et $n$ la longueur de la série. Un capteur est retenu si $|\rho| \ge 0{,}5$. Pour chaque capteur retenu, la moyenne, l'écart-type et la pente sont calculés sur une fenêtre glissante de 10 cycles, moteur par moteur ; avec le HI et le numéro de cycle, chaque cycle est décrit par 38 variables.
+
+Suivant Wang et al. \cite{wang2008}, le HI est une combinaison linéaire des capteurs standardisés $z_j$ :
+
+\begin{equation}\label{eq:hi}
+\mathrm{HI}(t) = a_0 + \sum_j a_j\, z_j(t),
+\end{equation}
+
+ajustée par moindres carrés vers une cible égale à un sur les 10 \% premiers cycles de chaque moteur et à zéro sur les 10 \% derniers, puis lissée sur 10 cycles.
+
+\section{Classification de l'état de santé}\label{sec:classification}
+
+Un cycle est \textbf{critique} si sa RUL réelle est d'au plus 30 cycles. Deux classifieurs de scikit-learn \cite{pedregosa2011} sont comparés : un gradient boosting à histogrammes \cite{friedman2001,ke2017} et un SVM à noyau gaussien \cite{cortes1995} calibré par la méthode de Platt \cite{platt1999}. Les cycles d'un même moteur étant corrélés, la validation croisée se fait \textbf{par groupes de moteurs} (GroupKFold, 5 plis), sans fuite entre apprentissage et validation. Au dernier cycle observé, chaque moteur est classé \emph{critique} si sa probabilité dépasse $0{,}5$, \emph{surveillance} si elle dépasse 0,2, \emph{normal} sinon.
+
+\section{RUL par modèle de dégradation bayésien}\label{sec:degradation}
+
+Le HI d'un moteur est modélisé par un polynôme de degré 2 du temps réduit $\tau = t/100$, à coefficients propres au moteur :
+
+\begin{equation}\label{eq:degradation}
+\mathrm{HI}(t) = \boldsymbol\phi(t)^\top \mathbf w + \varepsilon, \qquad \boldsymbol\phi(t) = (1, \tau, \tau^2)^\top, \qquad \varepsilon \sim \mathcal N(0, \sigma^2).
+\end{equation}
+
+Les ajustements sur les moteurs d'entraînement donnent l'a priori de flotte $\mathbf w \sim \mathcal N(\mathbf m_0, \mathbf S_0)$ \cite{gebraeel2005}, la variance $\sigma^2$ des résidus et un seuil de défaillance $\mathcal N(\bar s, \sigma_s^2)$. Pour un moteur observé, de matrice de régression $\boldsymbol\Phi$ et de mesures $\mathbf h$, la loi a posteriori est gaussienne :
+
+\begin{equation}\label{eq:posterior}
+\mathbf S_n^{-1} = \mathbf S_0^{-1} + \frac{\boldsymbol\Phi^\top \boldsymbol\Phi}{\sigma^2}, \qquad \mathbf m_n = \mathbf S_n \left(\mathbf S_0^{-1} \mathbf m_0 + \frac{\boldsymbol\Phi^\top \mathbf h}{\sigma^2}\right).
+\end{equation}
+
+On tire 1\,000 couples de coefficients et de seuils ; le premier passage de chaque trajectoire sous le seuil donne une RUL. La médiane est la prédiction, et les quantiles donnent les intervalles P25–P75, P10–P90 et P05–P95. Le bruit $\varepsilon$ n'est pas propagé dans les trajectoires.
+
+\section{RUL par réseau LSTM}\label{sec:lstm}
+
+Les 12 capteurs retenus sont normalisés entre zéro et un, et chaque exemple est une fenêtre de 30 cycles d'un même moteur. Suivant Heimes \cite{heimes2008}, la cible est plafonnée, $y = \min(\mathrm{RUL}, 125)$, car la dégradation n'est pas observable en début de vie. Le réseau \cite{hochreiter1997,zheng2017} comprend 2 couches LSTM de 64 unités, une couche dense et une sortie linéaire ; il est entraîné avec Adam \cite{kingma2015} sous PyTorch \cite{paszke2019}, avec un arrêt précoce sur 15 moteurs de validation.
+
+\chapconclusion
+
+Ce chapitre a présenté les méthodes et leurs hypothèses, en particulier la censure non informative et les temps de réparation simulés. Le chapitre suivant les évalue sur les données de test et présente leur restitution.

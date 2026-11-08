@@ -148,7 +148,7 @@ def tableaux(F, H, R, D):
         ["l", "l", "r", "r", "r", "r", "r"]))
 
     M = R["metrics"]
-    noms = {"deg": "Dégradation bayésienne (Eya)", "lstm": "LSTM (Salma)", "ensemble": "Moyenne des deux"}
+    noms = {"deg": "Dégradation bayésienne", "lstm": "LSTM", "ensemble": "Moyenne des deux"}
     T.append(Tableau("rul_metriques", "Performances des modèles de RUL sur les 100 moteurs de test",
         ["Modèle", "RMSE", "MAE", "Biais", "Score NASA", "|e| ≤ 15", "Tardives"],
         [[noms[k], fr(M[k]["rmse"], 2), fr(M[k]["mae"], 2), fr(M[k]["bias"], 1, True), fr(M[k]["score"], 0),

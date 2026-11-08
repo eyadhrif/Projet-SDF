@@ -1,14 +1,14 @@
 """Archive du projet LaTeX pour Overleaf (New Project -> Upload Project).
 
     node build.mjs --latex      # génère report/latex/
-    python zip_overleaf.py      # -> report/Rapport_V1_Overleaf.zip
+    python zip_overleaf.py      # -> report/Rapport_Overleaf.zip
 """
 import zipfile
 from pathlib import Path
 
 ICI = Path(__file__).resolve().parent
 SRC = ICI / "latex"
-ZIP = ICI / "Rapport_V1_Overleaf.zip"
+ZIP = ICI / "Rapport_Overleaf.zip"
 
 
 def main():

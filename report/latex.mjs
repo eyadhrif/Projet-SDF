@@ -109,6 +109,7 @@ function preambule(M) {
       {\setmainfont{texgyretermes}[Extension=.otf,UprightFont=*-regular,BoldFont=*-bold,ItalicFont=*-italic,BoldItalicFont=*-bolditalic]}}
   \setmonofont{lmmono10-regular}[Extension=.otf,Scale=0.95]
   \usepackage[bidi=default,english,french]{babel}
+  \frenchsetup{StandardLists=true,SmallCapsFigTabCaptions=false}
   \babelprovide[import]{arabic}
   \babelfont[arabic]{rm}[Scale=1.15]{Amiri}
   \newcommand{\arabicabstract}{\begin{otherlanguage}{arabic}\input{chapters/resume_arabe}\end{otherlanguage}}
@@ -119,6 +120,7 @@ function preambule(M) {
   \usepackage[scaled=0.92]{helvet}
   \usepackage{lmodern}\renewcommand{\rmdefault}{ptm}\renewcommand{\ttdefault}{lmtt}
   \usepackage[english,french]{babel}
+  \frenchsetup{StandardLists=true,SmallCapsFigTabCaptions=false}
   \newcommand{\arabicabstract}{\noindent\includegraphics[width=\linewidth]{figures/resume_arabe.pdf}}
 \fi
 
@@ -157,8 +159,8 @@ function preambule(M) {
 \usepackage{booktabs,tabularx,array}
 \usepackage{adjustbox}
 \usepackage{amssymb}
-\usepackage{enumitem}\setlist{itemsep=2pt,topsep=4pt}
-\usepackage{caption}\captionsetup{font=small}
+\usepackage{enumitem}\setlist{itemsep=2pt,topsep=4pt}\setlist[itemize]{label=\textbullet}
+\usepackage{caption}\captionsetup{labelsep=colon,font=normalsize,skip=8pt}
 \usepackage{float}
 \usepackage{multicol}
 \usepackage[most]{tcolorbox}
@@ -174,6 +176,7 @@ function preambule(M) {
 \newcommand{\chapconclusion}{\section*{Conclusion}}
 
 \addto\captionsfrench{\renewcommand{\listfigurename}{Liste des figures}\renewcommand{\listtablename}{Liste des tableaux}%
+  \renewcommand{\tablename}{Tableau}%
   \renewcommand{\contentsname}{Table des matières}\renewcommand{\bibname}{Bibliographie}}
 
 \setcounter{tocdepth}{1}
@@ -199,7 +202,7 @@ function pageDeGarde(M) {
 \end{minipage}
 
 \vspace{0.5cm}
-{\color{navy}\rule{\linewidth}{1pt}}\par
+\rule{\linewidth}{1pt}\par
 \vspace{0.35cm}
 {\large\bfseries ${e(M.universite)}\par}
 \vspace{2pt}
@@ -207,30 +210,33 @@ function pageDeGarde(M) {
 \vspace{2pt}
 {\bfseries ${e(M.departement)}\par}
 \vspace{0.3cm}
-{\color{navy}\rule{\linewidth}{1pt}}\par
+\rule{\linewidth}{1pt}\par
 
-\vspace{0.7cm}
+\vfill
 {\LARGE\bfseries ${e(M.type)}\par}
-\vspace{0.3em}
-{\large\bfseries ${e(M.formation)}\par}
-
-\vspace{0.7cm}
-{\normalsize ${e(M.presente_par)}\par}
-\vspace{0.4em}
-{\LARGE\bfseries ${M.auteurs.map(e).join('\\\\[0.2em] ')}\par}
-
-\vspace{0.7cm}
-\rule{0.85\linewidth}{0.6pt}\par
-\vspace{0.6em}
-{\fontsize{22}{27}\selectfont\bfseries\color{navy} ${e(M.titre)}\par}
 \vspace{0.35em}
-{\Large\bfseries ${e(M.sous_titre)}\par}
-\vspace{0.6em}
+{\normalsize\bfseries ${e(M.formation)}\par}
+
+${M.auteurs.length ? `\\vspace{0.7cm}
+{\\normalsize ${e(M.presente_par)}\\par}
+\\vspace{0.4em}
+{\\LARGE\\bfseries ${M.auteurs.map(e).join('\\\\[0.2em] ')}\\par}
+` : ''}
+\vfill
+\rule{0.85\linewidth}{0.6pt}\par
+\vspace{0.7em}
+{\fontsize{24}{30}\selectfont\bfseries ${e(M.titre).replace(' et maintenance', '\\\\ et maintenance')}\par}
+\vspace{0.5em}
+{\large\bfseries ${e(M.sous_titre)}\par}
+\vspace{0.7em}
 \rule{0.85\linewidth}{0.6pt}\par
 
-\vspace{0.6cm}
+\vfill
+\IfFileExists{figures/logo_projet.pdf}{\includegraphics[height=4.6cm,keepaspectratio]{figures/logo_projet.pdf}\par}{}
+
+\vfill
 {\normalsize ${e(M.version)}\par}
-\vspace{0.7cm}
+\vspace{0.5em}
 {\normalsize\textbf{Encadré par :} ${e(M.encadrant)}\par}
 
 \vfill
@@ -292,7 +298,7 @@ export function genererLatex() {
       if (niv === 1) {
         if (['Table des matières', 'Liste des figures', 'Liste des tableaux'].includes(titre)) return ''   // titres produits par LaTeX
         if (titre === 'Bibliographie') return ''
-        if (titre === 'Résumé') return garder(`\\clearpage\\frontmark{${T}}\n\\addcontentsline{toc}{chapter}{${T}}\n\\setstretch{1.15}\\small`)
+        if (titre === 'Résumé') return garder(`\\clearpage\\pagestyle{empty}\\thispagestyle{empty}\n\\addcontentsline{toc}{chapter}{${T}}\n\\setstretch{1.1}\\small`)
         if (att === '-') return garder(`\\chapter*{${T}}\n\\addcontentsline{toc}{chapter}{${T}}\n\\frontmark{${T}}`)
         return garder(`\\chapter{${T}}${label}`)
       }
@@ -404,7 +410,7 @@ Pour modifier le texte, modifier les sources Markdown puis régénérer : ne pas
 
 ## Overleaf
 
-1. *New Project* → *Upload Project* → choisir \`Rapport_V1_Overleaf.zip\`.
+1. *New Project* → *Upload Project* → choisir \`Rapport_Overleaf.zip\`.
 2. *Menu* → *Compiler* : **XeLaTeX** (recommandé : police Times New Roman et résumé arabe en texte).
    Avec pdfLaTeX (défaut d'Overleaf), le document compile aussi ; le résumé arabe est alors inclus en image.
 3. Fichier principal : \`main.tex\`.

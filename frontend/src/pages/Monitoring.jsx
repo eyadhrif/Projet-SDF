@@ -63,7 +63,7 @@ export default function Monitoring({ engine, setEngine }) {
         <span className="tag">{he.selected.length} capteurs retenus · {he.n_features} features</span>
       </div>
 
-      <Section owner="Salma">PDM-01 · Feature engineering & indicateur de santé</Section>
+      <Section>Feature engineering & indicateur de santé</Section>
       <div className="grid">
         <Card title="Sélection des capteurs" span={5}
           sub={`Tendance (corrélation avec le temps) ; seuil |ρ| ≥ 0,5. Capteurs constants écartés : ${he.dropped.join(', ')}`}>
@@ -123,7 +123,7 @@ export default function Monitoring({ engine, setEngine }) {
         </Card>
       </div>
 
-      <Section owner="Eya">PDM-02 · Classification normal / critique</Section>
+      <Section>Classification normal / critique</Section>
       <div className="grid">
         <Card title="Performances" span={5} sub="Validation croisée par groupes de moteurs (GroupKFold 5) puis jeu de test NASA">
           <table>

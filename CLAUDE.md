@@ -78,7 +78,7 @@ run_tests.bat / run_tests.sh  run everything (add --slow for retraining + full r
 pytest.ini                    marker `slow`, pythonpath = backend
 report/                       Phase B report: source/*.md, figures/ (A3), tables/ (A4), generated/valeurs.json,
                               captures/ (dashboard screenshots), bibliographie.json, build.mjs, CHANGELOG.md,
-                              Rapport_V1_FMDS_Eya_Salma.pdf
+                              Rapport_FMDS_Eya_DHRIF_Salma_MOUEDDEB.pdf (rapport final, compilé sur Overleaf)
 ```
 
 ### Run
