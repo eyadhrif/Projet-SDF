@@ -146,11 +146,35 @@ def test_construction_du_pdf(tmp_path):
     p = subprocess.run([NODE, "build.mjs", f"--sortie={pdf}"], cwd=REPORT, capture_output=True, text=True,
                        encoding="utf-8", timeout=900)
     assert p.returncode == 0, p.stdout + p.stderr
-    assert pdf.read_bytes()[:5] == b"%PDF-"
+    verifier_pdf_binaire(pdf.read_bytes())
     v = json.loads((REPORT / "build" / "verification.json").read_text(encoding="utf-8"))
     assert v["pages"] >= 30
 
 
-def test_pdf_livre_present():
-    pdf = REPORT / "Rapport_V1_FMDS_Eya_Salma.pdf"
-    assert pdf.read_bytes()[:5] == b"%PDF-" and pdf.stat().st_size > 1_000_000
+def verifier_pdf_binaire(data):
+    """PDF binaire intact : en-tête, fin de fichier, et aucune trace de réécriture en texte.
+
+    Un PDF lu comme du texte puis réécrit en UTF-8 voit ses octets ≥ 0x80 remplacés par U+FFFD
+    (EF BF BD) : sa taille double et ses flux compressés deviennent illisibles (constaté sur le
+    tag v1.0.1-rapport).
+    """
+    assert data[:5] == b"%PDF-", "en-tête PDF absent"
+    assert b"%%EOF" in data[-1024:], "fin de fichier PDF absente"
+    fffd = "�".encode("utf-8")                      # EF BF BD
+    debut = data.index(b"\n%") + 2                      # commentaire binaire après « %PDF-1.x »
+    assert data[debut] >= 0x80 and data[debut:debut + 3] != fffd, "commentaire binaire de l'en-tête altéré"
+    assert data.count(fffd) < 100, "octets remplacés par U+FFFD : PDF réécrit comme du texte"
+
+
+def test_pdf_livre_present_et_intact():
+    data = (REPORT / "Rapport_V1_FMDS_Eya_Salma.pdf").read_bytes()
+    assert len(data) > 1_000_000
+    verifier_pdf_binaire(data)
+
+
+def test_verification_pdf_detecte_une_reecriture_en_texte():
+    """Contrôle du test : un PDF décodé en texte puis réécrit en UTF-8 est bien rejeté."""
+    sain = (REPORT / "Rapport_V1_FMDS_Eya_Salma.pdf").read_bytes()
+    abime = sain.decode("utf-8", errors="replace").encode("utf-8")
+    with pytest.raises(AssertionError):
+        verifier_pdf_binaire(abime)

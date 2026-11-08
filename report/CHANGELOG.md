@@ -2,7 +2,12 @@
 
 Chaque version a un tag git (`v1.0-rapport`, `v2.0-rapport`, `v3.0-rapport`). Le rapport de tests joint à chaque version est `tests/RAPPORT_TESTS.md`, à l'état du tag.
 
-## Version 1.0.1 (tag `v1.0.1-rapport`)
+## Version 1.0.2 (tag `v1.0.2-rapport`) — version à utiliser
+
+- **Correctif :** le PDF du tag `v1.0.1-rapport` est **corrompu** (octets binaires réécrits comme du texte UTF-8 entre sa construction et le commit ; taille 4,7 Mo au lieu de 2,6 Mo, flux illisibles). Le PDF est reconstruit et validé ; son contenu est celui de la version 1.0.1.
+- Test renforcé (`tests/test_report.py`) : le PDF livré doit être un binaire intact (en-tête, fin de fichier, aucune trace de réécriture en texte) ; le test vérifie lui-même qu'il rejette un PDF ainsi abîmé.
+
+## Version 1.0.1 (tag `v1.0.1-rapport`) — PDF corrompu, utiliser 1.0.2
 
 - Installation propre vérifiée sous Linux (Ubuntu, WSL 2) : suite de tests rapide verte ; `run_all.py` redonne les mêmes résultats qu'à Windows, sauf une prédiction LSTM intermédiaire qui diffère d'une unité d'arrondi (calcul flottant). Le test de reproduction tolère désormais cet écart pour les seules séries LSTM par cycle ; toutes les métriques restent comparées à l'identique.
 - Rapport : une phrase ajoutée au chapitre 5 (reproductibilité sous Linux). Aucun chiffre modifié.
