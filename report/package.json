@@ -1,0 +1,17 @@
+{
+  "name": "rapport-fmds",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Construction du rapport scientifique (Markdown + KaTeX -> HTML -> PDF via Chromium)",
+  "scripts": {
+    "build": "node build.mjs",
+    "check": "node build.mjs --check",
+    "captures": "node build.mjs --captures"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.0",
+    "katex": "^0.16.47",
+    "marked": "^15.0.12"
+  }
+}

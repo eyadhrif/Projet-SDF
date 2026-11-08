@@ -1,0 +1,9 @@
+# Conclusion {#sec:conclusion}
+
+Cette première version de l'étude a appliqué l'ensemble de la démarche de sûreté de fonctionnement à une flotte de turboréacteurs simulés, des données brutes jusqu'à un outil d'aide à la décision.
+
+L'analyse de fiabilité, menée en tenant compte des {{n_censures}} moteurs censurés, montre une flotte soumise à l'usure, avec une période sans défaillance. La loi de Weibull à trois paramètres, validée par le test de Kolmogorov-Smirnov et équivalente à la loi log-normale selon l'AIC, donne un MTTF de {{mttf}} cycles et des durées $B_{10}$ et $B_{50}$ de {{b10}} et {{b50}} cycles. Sous des hypothèses de réparation et de coût explicitement signalées, la disponibilité intrinsèque atteint {{dispo}} % et un remplacement préventif à {{t_opt_arrondi}} cycles réduit le coût par cycle de {{gain_preventif}} %.
+
+La chaîne de maintenance prédictive complète cette vision globale par une décision moteur par moteur. Un indicateur de santé construit sur {{n_retenus}} capteurs décrit la dégradation de façon monotone, le classifieur détecte l'état critique avec une AUC de {{gb_auc}}, et deux modèles estiment la durée de vie résiduelle. Le LSTM est le plus précis (RMSE de {{lstm_rmse}} cycles). Le modèle de dégradation bayésien, moins précis (RMSE de {{deg_rmse}} cycles), est interprétable et probabiliste ; son biais et la calibration insuffisante de ses intervalles sont identifiés, mesurés et expliqués.
+
+Enfin, l'ensemble est livré sous la forme d'un système reproductible : pipeline, API, tableau de bord et suite de tests automatiques, qui garantit que chaque chiffre de ce rapport provient du code. Les perspectives prioritaires pour la Version 2 sont l'amélioration du modèle de dégradation et de ses intervalles, l'estimation de la loi à trois paramètres avec censure, et l'extension aux sous-ensembles comportant plusieurs conditions opératoires.

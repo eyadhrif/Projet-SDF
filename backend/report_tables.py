@@ -184,6 +184,40 @@ def tableaux(F, H, R, D):
 
 
 # ================================================================= valeurs citées dans le texte
+def parametres():
+    """Paramètres des méthodes, lus dans le code (signatures et objets), jamais recopiés à la main."""
+    import inspect
+    import re
+    from pipeline import features, rul_lstm
+    from pipeline.health import make_models
+    from pipeline.data import MIN_UNIQUE
+    gb = make_models()["Gradient Boosting"]
+    svm = make_models()["SVM (RBF)"]
+    reg = inspect.signature(rul_lstm.LSTMRegressor.__init__).parameters
+    fit = inspect.signature(rul_lstm.LSTMRUL.fit).parameters
+    hi = inspect.signature(features.HealthIndicator.__init__).parameters
+    src_lstm = inspect.getsource(rul_lstm.LSTMRUL.fit)
+    src_health = inspect.getsource(__import__("pipeline.health", fromlist=["x"]))
+    src_fmds = inspect.getsource(fmds_mod)
+    n_val = int(re.search(r"rng\.choice\(units, (\d+), replace=False\)", src_lstm).group(1))
+    n_svm = int(re.search(r"size=min\((\d+), len\(Xtr\)\)", src_health).group(1))
+    k_plis = int(re.search(r"GroupKFold\((\d+)\)", src_health).group(1))
+    na_bw = float(re.search(r"def nelson_aalen\(life: pd.DataFrame, bandwidth=([\d.]+)\)", src_fmds).group(1))
+    h_cond = int(re.search(r"W\.R\(t \+ (\d+)\)", src_fmds).group(1))
+    return {
+        "lstm_couches": str(reg["layers"].default), "lstm_unites": str(reg["hidden"].default),
+        "lstm_dropout": fr(reg["dropout"].default), "lstm_epoques_max": str(fit["epochs"].default),
+        "lstm_patience": str(fit["patience"].default), "lstm_lot": str(fit["batch"].default),
+        "lstm_lr": fr(fit["lr"].default, 3), "lstm_val_moteurs": str(n_val),
+        "gb_iterations": str(gb.max_iter), "gb_lr": fr(gb.learning_rate, 2), "gb_feuilles": str(gb.max_leaf_nodes),
+        "svm_c": fr(svm.steps[1][1].estimator.C, 0), "svm_echantillon": fr(n_svm, 0), "k_plis": str(k_plis),
+        "hi_frac_sain": fr(100 * hi["healthy_frac"].default, 0), "hi_frac_defaillant": fr(100 * hi["failed_frac"].default, 0),
+        "min_valeurs_distinctes": str(MIN_UNIQUE), "na_largeur_noyau": fr(na_bw, 0), "horizon_conditionnel": str(h_cond),
+        "deg_degre": str(DEG), "n_capteurs_illustres": "6",
+        "moteur_exemple": str(inspect.signature(__import__("report_figures").fig_moteur).parameters["unit"].default),
+    }
+
+
 def valeurs(F, H, R, D, I):
     fi, ma, di, pr = F["fiabilite"], F["maintenabilite"], F["disponibilite"], F["preventif"]
     comp = {c["model"]: c for c in fi["comparison"]}
@@ -229,6 +263,7 @@ def valeurs(F, H, R, D, I):
         "cp": fr(pr["Cp"], 0), "cc": fr(pr["Cc"], 0), "t_opt": fr(pr["T_opt"]), "t_opt_arrondi": fr(pr["T_opt"], 0),
         "r_t_opt": fr(pr["R_at_T"], 3), "cout_opt": fr(pr["cost_opt"], 4), "cout_rtf": fr(pr["cost_rtf"], 4),
         "gain_preventif": fr(pr["saving_pct"], 0),
+        "vie_sacrifiee": fr(fi["mttf"] - pr["T_opt"]),   # MTTF − T* : vie moyenne non utilisée par le préventif
         # santé
         "rul_critique": str(H["critical_rul"]), "prob_surveillance": fr(PROB_WATCH),
         "seuil_tendance": fr(TREND_THRESHOLD), "fenetre": str(WINDOW),
@@ -262,12 +297,17 @@ def valeurs(F, H, R, D, I):
         "seuil_deg": fr(DI["threshold"], 3), "seuil_deg_std": fr(DI["threshold_std"], 3), "sigma_deg": fr(DI["sigma"], 3),
         "n_tirages": fr(N_SAMPLES, 0), "horizon": str(HORIZON), "seq": str(SEQ), "rul_cap": str(RUL_CAP),
         "lstm_epoques": str(len(R["lstm_info"]["history"])), "lstm_val_rmse": fr(R["lstm_info"]["best_val_rmse"], 2),
+        # paramètres des méthodes, lus dans le code
+        **parametres(),
         # exécution
         "python": I["python"],
         "v_numpy": I["bibliotheques"]["numpy"], "v_pandas": I["bibliotheques"]["pandas"],
         "v_sklearn": I["bibliotheques"]["scikit-learn"], "v_lifelines": I["bibliotheques"]["lifelines"],
         "v_torch": I["bibliotheques"]["torch"], "v_fastapi": I["bibliotheques"]["fastapi"],
     }
+    ex = next(x for x in R["table"] if str(x["unit"]) == v["moteur_exemple"])      # moteur d'exemple des figures
+    v.update({"ex_cycles": str(ex["cycles"]), "ex_rul_reel": str(ex["true"]), "ex_deg": fr(ex["deg"], 0),
+              "ex_deg_p10": fr(ex["deg_p10"], 0), "ex_deg_p90": fr(ex["deg_p90"], 0), "ex_lstm": fr(ex["lstm"], 0)})
     return dict(sorted(v.items()))
 
 
