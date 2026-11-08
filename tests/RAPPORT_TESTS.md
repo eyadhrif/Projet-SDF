@@ -1,7 +1,7 @@
 # Rapport de tests
 
-- **Date :** 2026-11-07 23:43
-- **Commit :** `f1ac56d`
+- **Date :** 2026-11-08 11:27
+- **Commit :** `80843c0 + modifications non commitées`
 - **Mode :** complet (tests lents inclus : réentraînements, run_all.py complet)
 - **Généré par :** `tests/generer_rapport.py` (ne pas modifier à la main)
 
@@ -9,9 +9,9 @@
 
 | Suite | Tests | Réussis | Échecs | Erreurs | Échecs attendus | Ignorés | Durée |
 |---|---|---|---|---|---|---|---|
-| pytest (backend) | 191 | 188 | 0 | 0 | 1 | 2 | 511 s |
-| Playwright (dashboard) | 68 | 56 | 0 | 0 | 12 | 0 | 90 s |
-| **Total** | **259** | **244** | **0** | **0** | **13** | **2** | **602 s** |
+| pytest (backend) | 275 | 275 | 0 | 0 | 0 | 0 | 649 s |
+| Playwright (dashboard) | 68 | 68 | 0 | 0 | 0 | 0 | 114 s |
+| **Total** | **343** | **343** | **0** | **0** | **0** | **0** | **763 s** |
 
 ✅ **Tout est vert**
 
@@ -21,20 +21,22 @@
 
 | Fichier | Tests | Réussis | Échecs | Échecs attendus | Ignorés | Durée |
 |---|---|---|---|---|---|---|
-| `dashboard.spec.js` | 68 | 56 | 0 | 12 | 0 | 90.1 s |
-| `test_api.py` | 25 | 25 | 0 | 0 | 0 | 6.5 s |
-| `test_build.py` | 2 | 2 | 0 | 0 | 0 | 23.7 s |
-| `test_data.py` | 15 | 15 | 0 | 0 | 0 | 0.9 s |
-| `test_documentation.py` | 28 | 28 | 0 | 0 | 0 | 0.1 s |
+| `dashboard.spec.js` | 68 | 68 | 0 | 0 | 0 | 114.1 s |
+| `test_api.py` | 25 | 25 | 0 | 0 | 0 | 10.6 s |
+| `test_build.py` | 2 | 2 | 0 | 0 | 0 | 27.9 s |
+| `test_data.py` | 19 | 19 | 0 | 0 | 0 | 1.1 s |
+| `test_documentation.py` | 33 | 33 | 0 | 0 | 0 | 0.1 s |
 | `test_environnement.py` | 12 | 12 | 0 | 0 | 0 | 0.1 s |
-| `test_features.py` | 16 | 16 | 0 | 0 | 0 | 18.5 s |
-| `test_fmds.py` | 32 | 31 | 0 | 1 | 0 | 3.2 s |
-| `test_health.py` | 13 | 13 | 0 | 0 | 0 | 48.2 s |
-| `test_metrics.py` | 12 | 12 | 0 | 0 | 0 | 0.0 s |
-| `test_report.py` | 1 | 0 | 0 | 0 | 1 | 0.0 s |
-| `test_results.py` | 14 | 13 | 0 | 0 | 1 | 215.9 s |
-| `test_rul_degradation.py` | 12 | 12 | 0 | 0 | 0 | 6.7 s |
-| `test_rul_lstm.py` | 9 | 9 | 0 | 0 | 0 | 187.7 s |
+| `test_features.py` | 16 | 16 | 0 | 0 | 0 | 18.4 s |
+| `test_fmds.py` | 32 | 32 | 0 | 0 | 0 | 3.2 s |
+| `test_health.py` | 13 | 13 | 0 | 0 | 0 | 46.9 s |
+| `test_metrics.py` | 12 | 12 | 0 | 0 | 0 | 0.1 s |
+| `test_report.py` | 12 | 12 | 0 | 0 | 0 | 11.4 s |
+| `test_report_figures.py` | 25 | 25 | 0 | 0 | 0 | 32.2 s |
+| `test_report_tables.py` | 27 | 27 | 0 | 0 | 0 | 0.3 s |
+| `test_results.py` | 19 | 19 | 0 | 0 | 0 | 287.8 s |
+| `test_rul_degradation.py` | 17 | 17 | 0 | 0 | 0 | 8.9 s |
+| `test_rul_lstm.py` | 11 | 11 | 0 | 0 | 0 | 199.6 s |
 
 ## Couverture du code Python
 
@@ -44,13 +46,13 @@ Objectif : **≥ 90 %** sur `backend/pipeline/` et `backend/api/`.
 |---|---|---|---|
 | `backend/api/main.py` | 48 | 0 | 100 % |
 | `backend/pipeline/__init__.py` | 0 | 0 | 100 % |
-| `backend/pipeline/data.py` | 32 | 0 | 100 % |
+| `backend/pipeline/data.py` | 50 | 0 | 100 % |
 | `backend/pipeline/features.py` | 63 | 0 | 100 % |
 | `backend/pipeline/fmds.py` | 124 | 0 | 100 % |
 | `backend/pipeline/health.py` | 36 | 0 | 100 % |
-| `backend/pipeline/rul_degradation.py` | 46 | 0 | 100 % |
-| `backend/pipeline/rul_lstm.py` | 85 | 1 | 99 % |
-| **Total** | **434** | **1** | **99.8 %** |
+| `backend/pipeline/rul_degradation.py` | 47 | 0 | 100 % |
+| `backend/pipeline/rul_lstm.py` | 97 | 1 | 99 % |
+| **Total** | **465** | **1** | **99.8 %** |
 
 Objectif atteint ✅.
 
@@ -60,14 +62,11 @@ Aucun.
 
 ## Échecs attendus (défauts connus)
 
-- `test_fmds.py` — test_b50_exporte : B50 pas encore exporté par fmds.py (ticket A1 de la phase A)
-- `dashboard.spec.js` — plusieurs tests (×4) : D6 : bouton « Précédent » et changement d'adresse
-- `dashboard.spec.js` — plusieurs tests (×8) : D7 : débordement horizontal en largeur mobile
+Aucun.
 
 ## Tests ignorés
 
-- `test_report.py` — test_dossier_du_rapport : rapport pas encore rédigé (phase B)
-- `test_results.py` — test_figures_et_tableaux_du_rapport : report/figures et report/tables seront générés en phase A (tickets A3, A4)
+Aucun.
 
 ## Environnement
 
