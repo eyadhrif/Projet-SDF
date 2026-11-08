@@ -1,7 +1,7 @@
 # Rapport de tests
 
 - **Date :** 2026-11-08 11:27
-- **Commit :** `80843c0 + modifications non commitées`
+- **Commit :** `9bdd2c2`
 - **Mode :** complet (tests lents inclus : réentraînements, run_all.py complet)
 - **Généré par :** `tests/generer_rapport.py` (ne pas modifier à la main)
 
