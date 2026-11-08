@@ -29,6 +29,9 @@ Context file for Claude Code. Read this first before touching the project.
   - Limit found while writing: the retained Weibull 3P is fitted on the 100 failures only (no censoring); discussed in the report, chapter 8
 - **Report change workflow:** edit code → `python run_all.py` → `python report_figures.py` → `python report_tables.py` → rebuild `frontend` (`npm run build` and `build:static`, copy to `dashboard_autonome.html`) → `node report/build.mjs` → `run_tests.bat --slow`. Tests fail if any generated file is stale
 - **Machine note:** Avast and 360 antivirus run on Eya's PC; on 8 Nov 2026 the fast test suite took 55 min instead of ~75 s for one run (probably file scanning)
+- **Linux install verified** (8 Nov 2026) in WSL Ubuntu, Python 3.12: clean clone + `pip install -r backend/requirements-lock.txt --index-url https://download.pytorch.org/whl/cpu --extra-index-url https://pypi.org/simple`; fast suite 267 passed (3 skipped: no Node in WSL); `run_all.py` identical to Windows except one per-cycle LSTM value in `engines.json` (39.0 vs 38.9, float rounding). `python3.12-venv` was installed in WSL as root for this
+- **Pushed to GitHub** `origin` = https://github.com/eyadhrif/Projet-SDF (main, corrections-defauts, tag v1.0-rapport). Salma still has to be invited (needs her GitHub username)
+- **Deliverables folder updated** (`Docs_étudiants_Projets SdF`): new zip (`git archive` of v1.0-rapport), dashboard_autonome.html, Rapport_V1 PDF, CLAUDE.md; old files kept as `*_ancien_2026-11-01`
 - **Windows long paths:** torch 2.15 fails to install in a deep folder (260-char limit, `LongPathsEnabled = 0` on Eya's PC). Keep the venv in a short path
 - **Not yet on GitHub.** The plan is a private repo `eyadhrif/SdF-FMDS-Maintenance-Predictive`, then invite Salma as a collaborator with Write access. Creating the repo from the cloud session was blocked, so Eya creates it empty on github.com, then push:
   ```bash
@@ -142,7 +145,7 @@ Rules: never change a test to make it pass without a written reason; known defec
 
 ## 5. Possible next steps
 
-1. Push to GitHub and invite Salma (see section 2)
+1. Invite Salma on GitHub (repository already pushed)
 2. Send the report PDF, the standalone dashboard and the repository link to the professor
 3. Version 2 of the report (see `report/CHANGELOG.md` and the report's Perspectives chapter): exponential / Wiener degradation model, calibrated intervals, Weibull 3P fitted with censoring, FD002/FD004
 4. Later and separate: the group portfolio (due 6 Dec), using `Feuille de route pour portfolio numérique_2025.pdf`

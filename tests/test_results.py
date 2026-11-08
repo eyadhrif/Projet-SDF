@@ -131,8 +131,15 @@ def _copie_et_lance(tmp_path, *args, garder_lstm):
 def test_run_all_reproduit_exactement_les_resultats(tmp_path, results):
     """Mode par défaut (LSTM de référence rechargé) : les 4 JSON sont identiques aux fichiers commités."""
     new = _copie_et_lance(tmp_path, garder_lstm=True)
-    for n in NAMES:
+    # Identité stricte de tout, sauf les prédictions LSTM cycle par cycle d'engines.json : d'une plateforme
+    # à l'autre (Windows / Linux), l'inférence du réseau diffère de ~1e-6 et peut faire basculer un arrondi
+    # au dixième (constaté : 1 valeur sur ~13 000, 39,0 contre 38,9). Ces valeurs sont comparées à ±0,1.
+    for n in ("fmds", "health", "rul"):
         assert new[n] == results[n], f"{n}.json diffère"
+    assert _sans_lstm("engines", new["engines"]) == _sans_lstm("engines", results["engines"])
+    ecarts = [abs(a["lstm"] - b["lstm"]) for u in results["engines"]
+              for a, b in zip(new["engines"][u]["series"], results["engines"][u]["series"]) if a["lstm"] is not None]
+    assert max(ecarts) <= 0.1 + 1e-9 and sum(e > 0 for e in ecarts) <= 10
     assert new["dataset"] == _strict_load(RESULTS / "dataset.json")
     assert new["run_info"]["lstm"].startswith("rechargé")
 

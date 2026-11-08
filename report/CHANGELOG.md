@@ -2,6 +2,11 @@
 
 Chaque version a un tag git (`v1.0-rapport`, `v2.0-rapport`, `v3.0-rapport`). Le rapport de tests joint à chaque version est `tests/RAPPORT_TESTS.md`, à l'état du tag.
 
+## Version 1.0.1 (tag `v1.0.1-rapport`)
+
+- Installation propre vérifiée sous Linux (Ubuntu, WSL 2) : suite de tests rapide verte ; `run_all.py` redonne les mêmes résultats qu'à Windows, sauf une prédiction LSTM intermédiaire qui diffère d'une unité d'arrondi (calcul flottant). Le test de reproduction tolère désormais cet écart pour les seules séries LSTM par cycle ; toutes les métriques restent comparées à l'identique.
+- Rapport : une phrase ajoutée au chapitre 5 (reproductibilité sous Linux). Aucun chiffre modifié.
+
 ## Version 1 — « Comprendre et démontrer » (tag `v1.0-rapport`)
 
 Première version du rapport scientifique, fondée uniquement sur les travaux réalisés, les modèles implémentés et les résultats obtenus.

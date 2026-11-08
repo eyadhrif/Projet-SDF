@@ -33,6 +33,9 @@ Chaque exécution écrit `results/run_info.json` : date, durée, versions des bi
 
 Pour retrouver exactement l'environnement testé (Windows 11, Python 3.12, CPU) : `pip install -r requirements-lock.txt`.
 
+Sous Linux (installation propre vérifiée sur Ubuntu, WSL 2, Python 3.12), utiliser la version CPU de torch :
+`pip install -r requirements-lock.txt --index-url https://download.pytorch.org/whl/cpu --extra-index-url https://pypi.org/simple`. Les résultats de `run_all.py` y sont identiques à ceux de Windows, à une exception près : une prédiction LSTM intermédiaire d'`engines.json` diffère d'une unité d'arrondi (0,1 cycle), à cause du calcul flottant ; toutes les métriques sont identiques.
+
 > **Windows : chemins trop longs.** torch installe des fichiers à des chemins très profonds. Si le projet est placé dans un dossier lui-même profond, l'installation échoue (`OSError: [Errno 2] No such file or directory … LICENSE…`) à cause de la limite de 260 caractères. Solutions : placer le projet (ou l'environnement virtuel) dans un dossier court, par exemple `C:\SdF\`, ou activer les chemins longs de Windows (`LongPathsEnabled`).
 
 > **Reproductibilité du LSTM.** Tous les résultats sont déterministes (graines fixées), sauf l'entraînement du LSTM, qui dépend de la machine et du contexte d'exécution (calcul flottant de PyTorch sur CPU). Sur une autre machine (Windows 11, Python 3.12, torch 2.15), `run_all.py` a donné RMSE 15,64, MAE 11,89 et score NASA 477, contre 15,35, 11,22 et 485 publiés. Deux entraînements successifs dans les mêmes conditions donnent en revanche des résultats identiques. **Les résultats publiés correspondent au modèle sauvegardé `models/lstm_rul.pt`**, qui redonne exactement les prédictions de `results/rul.json` (vérifié par `tests/test_rul_lstm.py`). C'est pourquoi `run_all.py` recharge ce modèle par défaut ; l'option `--reentrainer-lstm` le réentraîne et l'écrase.
